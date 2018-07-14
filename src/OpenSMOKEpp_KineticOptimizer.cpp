@@ -442,8 +442,8 @@ int main(int argc, char** argv)
 		}
 
 		else if (	algorithm == "LN_COBYLA" ||
-				algorithm == "GN_DIRECTA" ||
-				algorithm == "GN_CRS2_LM")
+					algorithm == "GN_DIRECTA" ||
+					algorithm == "GN_CRS2_LM")
 		{
 			double* lb = new double[number_parameters];// lower bounds
 			double* ub = new double[number_parameters];// upper bounds
@@ -750,7 +750,7 @@ void WriteFinalResult(const Eigen::VectorXd& real_parameters_0, const Eigen::Vec
 	unsigned int count = 0;
 	for (unsigned int k = 0; k < list_of_target_A.size(); k++)
 	{
-		fOut << " * Reaction: " << list_of_target_A[k] + 1 << std::endl;
+		fOut << " * Reaction: " << list_of_target_A[k] << std::endl;
 		fOut << "   A: " << real_parameters_0(count) << " -> " << real_parameters(count) << " (ratio: " << real_parameters(count) / real_parameters_0(count) << ")" << std::endl;
 		fOut << std::endl;
 
@@ -758,14 +758,14 @@ void WriteFinalResult(const Eigen::VectorXd& real_parameters_0, const Eigen::Vec
 	}
 	for (unsigned int k = 0; k < list_of_target_Beta.size(); k++)
 	{
-		fOut << " * Reaction: " << list_of_target_Beta[k] + 1 << std::endl;
+		fOut << " * Reaction: " << list_of_target_Beta[k] << std::endl;
 		fOut << "   Beta: " << real_parameters_0(count) << " -> " << real_parameters(count) << " (ratio: " << real_parameters(count) / real_parameters_0(count) << ")" << std::endl;
 		fOut << std::endl;
 		count++;
 	}
 	for (unsigned int k = 0; k < list_of_target_E_over_R.size(); k++)
 	{
-		fOut << " * Reaction: " << list_of_target_E_over_R[k] + 1 << std::endl;
+		fOut << " * Reaction: " << list_of_target_E_over_R[k] << std::endl;
 		fOut << "   E: " << real_parameters_0(count)*PhysicalConstants::R_cal_mol << " -> " << real_parameters(count)*PhysicalConstants::R_cal_mol << " (ratio: " << real_parameters(count) / real_parameters_0(count) << ")" << std::endl;
 		fOut << std::endl;
 		count++;
