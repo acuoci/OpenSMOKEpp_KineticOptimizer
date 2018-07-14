@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 		k0_500[i] = kineticsMapXML->A(i)*std::pow(500., kineticsMapXML->Beta(i))*std::exp(-kineticsMapXML->E_over_R(i) / 500.);
 		k0_1000[i] = kineticsMapXML->A(i)*std::pow(1000., kineticsMapXML->Beta(i))*std::exp(-kineticsMapXML->E_over_R(i) / 1000.);
 		k0_1500[i] = kineticsMapXML->A(i)*std::pow(1500., kineticsMapXML->Beta(i))*std::exp(-kineticsMapXML->E_over_R(i) / 1500.);
-		k0_2000[i] = kineticsMapXML->A(i)*std::pow(2000., kineticsMapXML->Beta(i))*std::exp(-kineticsMapXML->E_over_R(i) / 1500.);
+		k0_2000[i] = kineticsMapXML->A(i)*std::pow(2000., kineticsMapXML->Beta(i))*std::exp(-kineticsMapXML->E_over_R(i) / 2000.);
 	}
 
 	// Experiments
@@ -572,16 +572,32 @@ bool CheckViolationUncertaintyFactors()
 		const double gamma = std::pow(10., list_of_uncertainty_factors[k]);
 		
 		const double k500 = kineticsMapXML->A(index)*std::pow(500., kineticsMapXML->Beta(index))*std::exp(-kineticsMapXML->E_over_R(index) / 500.);
-		if (k500 < k0_500[index] / gamma || k500 > k0_500[index] * gamma)	return true;
+		if (k500 < k0_500[index] / gamma || k500 > k0_500[index] * gamma) 
+		{
+			std::cout << "Violation @500K, Reaction: " << index+1 << ", Current ratio: " << k500/k0_500[index] << ", Allowed ratio: " << 1./gamma << "-" << gamma << std::endl; 
+			return true;
+		}
 		
 		const double k1000 = kineticsMapXML->A(index)*std::pow(1000., kineticsMapXML->Beta(index))*std::exp(-kineticsMapXML->E_over_R(index) / 1000.);
-		if (k1000 < k0_1000[index] / gamma || k1000 > k0_1000[index] * gamma)	return true;
+		if (k1000 < k0_1000[index] / gamma || k1000 > k0_1000[index] * gamma)
+		{
+			std::cout << "Violation @1000K, Reaction: " << index + 1 << ", Current ratio: " << k1000 / k0_1000[index] << ", Allowed ratio: " << 1. / gamma << "-" << gamma << std::endl;
+			return true;
+		}
 		
 		const double k1500 = kineticsMapXML->A(index)*std::pow(1500., kineticsMapXML->Beta(index))*std::exp(-kineticsMapXML->E_over_R(index) / 1500.);
-		if (k1500 < k0_1500[index] / gamma || k1500 > k0_1500[index] * gamma)	return true;
+		if (k1500 < k0_1500[index] / gamma || k1500 > k0_1500[index] * gamma)
+		{
+			std::cout << "Violation @1500K, Reaction: " << index + 1 << ", Current ratio: " << k1500 / k0_1500[index] << ", Allowed ratio: " << 1. / gamma << "-" << gamma << std::endl;
+			return true;
+		}
 
 		const double k2000 = kineticsMapXML->A(index)*std::pow(2000., kineticsMapXML->Beta(index))*std::exp(-kineticsMapXML->E_over_R(index) / 2000.);
-		if (k2000 < k0_2000[index] / gamma || k2000 > k0_2000[index] * gamma)	return true;
+		if (k2000 < k0_2000[index] / gamma || k2000 > k0_2000[index] * gamma)
+		{
+			std::cout << "Violation @2000K, Reaction: " << index + 1 << ", Current ratio: " << k2000 / k0_2000[index] << ", Allowed ratio: " << 1. / gamma << "-" << gamma << std::endl;
+			return true;
+		}
 	}
 
 	return false;
