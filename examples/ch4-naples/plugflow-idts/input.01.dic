@@ -1,0 +1,55 @@
+Dictionary PlugFlowReactor
+{
+		@KineticsFolder 	../kinetic-mechanism/kinetics;
+		
+		@Type			NonIsothermal;
+		
+		@InletStatus          	inlet-mixture;
+		
+		@Length			540 cm;
+		
+		@Diameter 		1 cm;
+
+		@ConstantPressure	true;
+		
+		@Velocity		30 m/s;
+		
+		@GlobalThermalExchangeCoefficient    100.467  W/m2/K;
+		@EnvironmentTemperature              1200  K;
+		@CrossSectionOverPerimeter           0.0025 m;
+
+		@Options 				Output-options;
+		@ParametricAnalysis			parametric-analysis;
+		
+		@IgnitionDelayTimes		ignition-delay-times;
+}
+
+Dictionary ignition-delay-times
+{
+	@Temperature			true;
+	@Pressure				false;
+	@TemperatureIncrease	10 K;
+}						
+
+Dictionary inlet-mixture
+{
+		@Temperature   	1200.  	K ; 
+		@Pressure      	101325 	Pa;
+		@Moles			CH4 1	O2 5	N2 34;
+}
+
+Dictionary Output-options
+{
+		@OutputFolder 		Output_C-O=0.1;
+		@StepsFile 		1;
+		@OutputSpecies 		CH4;
+		@VerboseXMLFile 	false;
+
+}
+
+Dictionary parametric-analysis
+{	
+	@Type 				temperature; 
+	@ListOfValues 		1214.843342506277 1254.651995576110 1275.402609967009 1295.227681495119 1324.664533007875 1355.035341529885 1375.687601971453 1400 K;
+	@NumberOfThreads	6;
+}

@@ -1,0 +1,73 @@
+//-----------------------------------------------------------------//
+//     ____                    ______ __  __  ____  _  ________    //
+//    / __ \                  /  ___ |  \/  |/ __ \| |/ /  ____|   //
+//   | |  | |_ __   ___ _ __ |  (___ | \  / | |  | | ' /| |__      //
+//   | |  | | '_ \ / _ \ '_ \ \___  \| |\/| | |  | |  < |  __|     //
+//   | |__| | |_) |  __/ | | |____)  | |  | | |__| | . \| |____    //
+//    \____/| .__/ \___|_| |_|______/|_|  |_|\____/|_|\_\______|   //
+//         | |                                                     //
+//         |_|                                                     //
+//                                                                 //
+//                http://www.opensmoke.polimi.it/                  //
+//             http://creckmodeling.chem.polimi.it/                //
+//-----------------------------------------------------------------//
+
+Dictionary Optimizer
+{
+		@KineticsFolder				kinetic-mechanism/kinetics;
+		
+		@Algorithm 					OpenSMOKEpp-Simplex;	// OpenSMOKEpp-Simplex | LN_COBYLA | GN_DIRECTA | GN_CRS2_LM
+		@MaxIterations				10000;
+		@RelativeErrors				true;
+		
+		
+		@ListOfPlugFlowExperiments		experiments/plug.CO_01.T_1214.dic
+										experiments/plug.CO_01.T_1254.dic
+										experiments/plug.CO_01.T_1275.dic
+										experiments/plug.CO_01.T_1295.dic
+										experiments/plug.CO_01.T_1324.dic
+										experiments/plug.CO_01.T_1355.dic
+										experiments/plug.CO_01.T_1375.dic
+										experiments/plug.CO_01.T_1400.dic
+
+										experiments/plug.CO_02.T_1284.dic
+										experiments/plug.CO_02.T_1304.dic
+										experiments/plug.CO_02.T_1324.dic
+										experiments/plug.CO_02.T_1355.dic
+										experiments/plug.CO_02.T_1375.dic
+										
+										experiments/plug.CO_0025.T_1204.dic
+										experiments/plug.CO_0025.T_1215.dic
+										experiments/plug.CO_0025.T_1233.dic
+										experiments/plug.CO_0025.T_1249.dic
+										experiments/plug.CO_0025.T_1254.dic
+										experiments/plug.CO_0025.T_1275.dic										
+										experiments/plug.CO_0025.T_1295.dic
+										experiments/plug.CO_0025.T_1323.dic
+										experiments/plug.CO_0025.T_1375.dic
+										experiments/plug.CO_0025.T_1400.dic										
+										
+										experiments/plug.CO_0075.T_1215.dic
+										experiments/plug.CO_0075.T_1254.dic
+										experiments/plug.CO_0075.T_1275.dic
+										experiments/plug.CO_0075.T_1295.dic
+										experiments/plug.CO_0075.T_1324.dic
+										experiments/plug.CO_0075.T_1354.dic
+										experiments/plug.CO_0075.T_1375.dic
+										;
+
+		@ListOfTarget_A		1      271   405 ;
+		@ListOfMinRel_A		0.635  0.1   0.40;
+		@ListOfMaxRel_A		1.562  10.   2.50;
+			
+		@ListOfTarget_Beta	 	    1    405 ;
+		@ListOfMinAbs_Beta		-0.60   0.20 ;
+		@ListOfMaxAbs_Beta		 1.13   2.87 ;
+		
+		@ListOfTarget_E_over_R	    1       405 ;
+		@ListOfMinAbs_E_over_R		8052   4404 ;
+		@ListOfMaxAbs_E_over_R		8681   5660 ; 
+		
+//		@ListOfTargetUncertaintyFactors		405;
+//		@ListOfUncertaintyFactors			0.4;
+}
