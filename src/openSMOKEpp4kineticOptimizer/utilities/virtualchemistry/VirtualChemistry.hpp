@@ -54,8 +54,6 @@ namespace OpenSMOKE
 			Le_.setConstant(1.);
 			iReactions_ = true;
 			iSubMechanism_CO_ = false;
-			iSubMechanism_NO_ = false;
-			iSubMechanismType_NO_ = 1;
 			on_the_fly_optimization_ = "none";
 
 			// Indices of products
@@ -237,8 +235,6 @@ namespace OpenSMOKE
 
 				if (iSubMechanism_NO_ == true)
 				{
-					dictionary.ReadInt("@SubMechanismType_NO", iSubMechanismType_NO_);
-
 					NO_index_ = thermodynamicsMap_.IndexOfSpecies("NO") - 1;
 					W1_index_ = thermodynamicsMap_.IndexOfSpecies("W1") - 1;
 					W2_index_ = thermodynamicsMap_.IndexOfSpecies("W2") - 1;
@@ -335,11 +331,6 @@ namespace OpenSMOKE
 		table_no_3_.Setup(path_table_3);
 		table_no_4_.Setup(path_table_4);
 		table_no_5_.Setup(path_table_5);
-	}
-
-	void VirtualChemistry::SetSubMechanismType_NO(const unsigned int flag)
-	{
-		iSubMechanismType_NO_ = flag;
 	}
 
 	void VirtualChemistry::SetReactions(const bool flag)
@@ -981,7 +972,6 @@ namespace OpenSMOKE
 				A7_NO_ = table_no_5_.interpolated()(4);
 			}
 
-			if (iSubMechanismType_NO_ == 1)
 			{
 				// Mass fractions
 				const double YNO = Y[NO_index_];
@@ -1019,76 +1009,6 @@ namespace OpenSMOKE
 				Omega[W1_index_] = alpha_NO_ * r3 - r4;
 				Omega[W2_index_] = (1. - alpha_NO_)*r3 + (1. - beta_NO_)*r4 - r5 + r7;
 				Omega[W3_index_] = gamma_NO_ * r3 - r6 - r7;
-			}
-			else if (iSubMechanismType_NO_ == 2 || iSubMechanismType_NO_ == 3)
-			{
-				// Mass fractions
-				const double YN2  = Y[inert_index_];
-				const double YOX  = Y[oxidizer_index_];
-				const double YNO  = Y[NO_index_];
-				const double YH2O = Y[P1_index_];
-
-				// Concentrations [mol/m3]
-				const double N2  = cTot * YN2*MW  / MW_[fuel_index_] * 1000.;
-				const double O2  = cTot * YOX*MW  / MW_[oxidizer_index_] * 1000.;
-				const double NO  = cTot * YNO*MW  / MW_[NO_index_] * 1000.;
-				const double H2O = cTot * YH2O*MW / MW_[P1_index_] * 1000.;
-
-				// Prompt sub-mechanism
-				double SNO_prompt = 0.;
-				if (iSubMechanismType_NO_ == 3)
-				{
-					//	double a = 0.;
-					//	if (YOX < 0.0041)		a = 1.;
-					//	else if (YOX < 0.011)	a = -3.95 - 0.9*std::log(YOX);
-					//	else if (YOX < 0.030)	a = -0.35 - 0.1*std::log(YOX);
-					//	const double gamma = std::pow(1 / (cTot*1000.), a + 1.);
-					//	const double r3 = k3 *gamma* POW(CF, 1.)*POW(COX, a)*POW(CN2, 1.) * 1e-3;	// [kmol/m3/s]
-				}
-
-				// Thermal sub-mechanism
-				const double epsilon = 1.e-12;
-				const double Af1 = 1.15e8;
-				const double Af2 = 9.e3*T;
-				const double Af3 = 3.36e7;
-				const double Ef1 = 75634.;
-				const double Ef2 = 6500.;
-				const double Ef3 = 385.;
-				const double Ar1 = 2.7e7;
-				const double Ar2 = 1.e0*T;
-				const double Ar3 = 1.09e8;
-				const double Er1 = 355.;
-				const double Er2 = 38010.;
-				const double Er3 = 48685.;
-
-				const double kf1 = Af1 * std::exp(-Ef1 / 1.987 / T);
-				const double kf2 = Af2 * std::exp(-Ef2 / 1.987 / T);
-				const double kf3 = Af3 * std::exp(-Ef3 / 1.987 / T);
-				const double kr1 = Ar1 * std::exp(-Er1 / 1.987 / T);
-				const double kr2 = Ar2 * std::exp(-Er2 / 1.987 / T);
-				const double kr3 = Ar3 * std::exp(-Er3 / 1.987 / T);
-				const double kStar = kr1 * kr2 / kf1 / kf2;
-
-				// Concentrations of radicals [mol/m3]
-				const double O = alpha_NO_ * 36.64*std::sqrt(T)*std::exp(-27123./T)*std::sqrt(O2);						// [mol/m3]
-				const double OH = beta_NO_ * 212.9*std::pow(T, -0.57)*std::exp(-4595. / T)*std::sqrt(O)*std::sqrt(H2O);	// [mol/m3]
-
-				const double psi = 1.e-3;	// conversion
-				const double A = kStar * POW(NO, 2., psi)*POW(N2, -1., psi)*POW(O2, -1., psi);
-				const double B = kr1 * NO / (kf2*O2 + kf3 * OH + epsilon);
-				
-				const double SNO_thermal = gamma_NO_ * 2. * kf1*O*N2 * (1.-A)/(1.+B) * 1e-3;		// [kmol/m3/s]
-
-				
-				// Formation rates [kg/m3/s]
-				// Since the molecular weights of species are assumed equal to 1
-				// we are calculating the formation rates of species in mass units [kg/m3/s]
-				Omega[NO_index_] = MW_[NO_index_] * (SNO_thermal + SNO_prompt);
-				
-				// Not relevant
-				Omega[W1_index_] = 0.;
-				Omega[W2_index_] = 0.;
-				Omega[W3_index_] = 0.;
 			}
 		}
 	}

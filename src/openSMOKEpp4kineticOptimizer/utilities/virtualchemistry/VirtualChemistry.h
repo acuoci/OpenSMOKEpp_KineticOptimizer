@@ -70,7 +70,6 @@ namespace OpenSMOKE
 		void SetTableNO(	const boost::filesystem::path path_table_1, const boost::filesystem::path path_table_2,
 							const boost::filesystem::path path_table_3, const boost::filesystem::path path_table_4,
 							const boost::filesystem::path path_table_5);
-		void SetSubMechanismType_NO(const unsigned int flag);
 
 		void SetReactions(const bool flag);
 
@@ -144,7 +143,6 @@ namespace OpenSMOKE
 		bool iReactions_;
 		bool iSubMechanism_CO_;
 		bool iSubMechanism_NO_;
-		int iSubMechanismType_NO_;
 
 		unsigned int ns_;
 		unsigned int ns_main_;
