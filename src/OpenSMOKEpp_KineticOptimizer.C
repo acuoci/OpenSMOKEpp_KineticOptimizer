@@ -393,8 +393,9 @@ int main(int argc, char** argv)
 		for (unsigned int i = 0; i < number_parameters; i++)
 			std::cout << i << " " << real_parameters_0(i) << " | " << b0(i) << ": " << bMin(i) << "-" << bMax(i) << std::endl;
 
-		getchar();
-
+		std::cout << std::endl;
+		std::cout << "Performing additional checks on input data..." << std::endl;
+	
 		// Check
 		for (unsigned int i = 0; i < number_parameters; i++)
 		{
@@ -407,6 +408,7 @@ int main(int argc, char** argv)
 		}
 
 		// Initial objective function
+		std::cout << "Calculating the initial value of objective function..." << std::endl;
 		const double f0 = OptFunction(b0);
 
 		// Start optimization procedure
@@ -416,6 +418,8 @@ int main(int argc, char** argv)
 
 		fMonitoring.open("log", std::ios::out);
 		fMonitoring.setf(std::ios::scientific);
+
+		std::cout << "Starting calculation..." << std::endl;
 
 		if (algorithm == "OpenSMOKEpp-Simplex")
 		{
@@ -438,8 +442,8 @@ int main(int argc, char** argv)
 		}
 
 		else if (	algorithm == "LN_COBYLA" ||
-					algorithm == "GN_DIRECTA" ||
-					algorithm == "GN_CRS2_LM")
+				algorithm == "GN_DIRECTA" ||
+				algorithm == "GN_CRS2_LM")
 		{
 			double* lb = new double[number_parameters];// lower bounds
 			double* ub = new double[number_parameters];// upper bounds

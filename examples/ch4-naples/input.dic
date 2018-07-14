@@ -64,10 +64,10 @@ Dictionary Optimizer
 		@ListOfMinAbs_Beta		-0.60   0.20 ;
 		@ListOfMaxAbs_Beta		 1.13   2.87 ;
 		
-		@ListOfTarget_E_over_R	    1       405 ;
+		@ListOfTarget_E_over_R	        1       405 ;
 		@ListOfMinAbs_E_over_R		8052   4404 ;
 		@ListOfMaxAbs_E_over_R		8681   5660 ; 
 		
-//		@ListOfTargetUncertaintyFactors		405;
-//		@ListOfUncertaintyFactors			0.4;
+		@ListOfTargetUncertaintyFactors		1    405;
+		@ListOfUncertaintyFactors		0.1  0.4;
 }
