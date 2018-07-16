@@ -68,8 +68,8 @@ namespace OpenSMOKE
 		*@param plugflow_options options governing the output
 		*@param on_the_fly_ropa rate of production analysis (on the fly)
 		*@param on_the_fly_post_processing post-processing analysis (on the fly)
+		*@param idts_analyzer ignition delay time analyzer (on the fly)
 		*@param polimi_soot_analyzer soot analyzer (on the fly)
-		*@param virtual_chemistry virtual chemistry
 		*/
 		PlugFlowReactor(	OpenSMOKE::ThermodynamicsMap_CHEMKIN& thermodynamicsMap,
 							OpenSMOKE::KineticsMap_CHEMKIN& kineticsMap,
@@ -78,8 +78,7 @@ namespace OpenSMOKE
 							OpenSMOKE::OnTheFlyROPA& on_the_fly_ropa,
 							OpenSMOKE::OnTheFlyPostProcessing& on_the_fly_post_processing,
 							OpenSMOKE::IgnitionDelayTimes_Analyzer& idts_analyzer,
-							OpenSMOKE::PolimiSoot_Analyzer& polimi_soot_analyzer,
-							OpenSMOKE::VirtualChemistry& virtual_chemistry);
+							OpenSMOKE::PolimiSoot_Analyzer& polimi_soot_analyzer);
 
 		/**
 		*@brief Solves the plug flow reactor
@@ -164,6 +163,12 @@ namespace OpenSMOKE
 		void PrepareParametricASCIIFile(std::ofstream& fOutput, boost::filesystem::path output_file_ascii);
 
 		/**
+		*@brief Print Polimi Soot Analysis on file
+		*@param t current time [s]
+		*/
+		void PrintPolimiSoot(const double t);
+
+		/**
 		*@brief Prepares the ASCII file for ignition delay times
 		*@param fOutput ASCII file where the output will be written
 		*@param output_file_ascii name of ASCII file where the output will be written
@@ -176,12 +181,6 @@ namespace OpenSMOKE
 		*@param t time
 		*/
 		void PrintParametricIDT(std::ostream& fOutput, const double t);
-
-		/**
-		*@brief Print Polimi Soot Analysis on file
-		*@param t current time [s]
-		*/
-		void PrintPolimiSoot(const double t);
 
 	protected:
 
@@ -263,15 +262,14 @@ namespace OpenSMOKE
 
 protected:
 
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN&		thermodynamicsMap_;				//!< thermodynamic map
-		OpenSMOKE::KineticsMap_CHEMKIN&				kineticsMap_;					//!< kinetic map
-		OpenSMOKE::ODE_Parameters&					ode_parameters_;				//!< ode parameters
-		OpenSMOKE::PlugFlowReactor_Options&			plugflow_options_;				//!< options
-		OpenSMOKE::OnTheFlyROPA&					on_the_fly_ropa_;				//!< on the fly ROPA
-		OpenSMOKE::OnTheFlyPostProcessing&			on_the_fly_post_processing_;	//!< on the fly post-processing
-		OpenSMOKE::PolimiSoot_Analyzer&				polimi_soot_analyzer_;			//!< on the fly soot analyzer (based on POLIMI)
-		OpenSMOKE::VirtualChemistry&				virtual_chemistry_;				//!< virtual chemistry
-		OpenSMOKE::IgnitionDelayTimes_Analyzer&		idts_analyzer_;					//!< on the fly signition delay time analyzer
+		OpenSMOKE::ThermodynamicsMap_CHEMKIN&	thermodynamicsMap_;				//!< thermodynamic map
+		OpenSMOKE::KineticsMap_CHEMKIN&			kineticsMap_;					//!< kinetic map
+		OpenSMOKE::ODE_Parameters&				ode_parameters_;				//!< ode parameters
+		OpenSMOKE::PlugFlowReactor_Options&		plugflow_options_;				//!< options
+		OpenSMOKE::OnTheFlyROPA&				on_the_fly_ropa_;				//!< on the fly ROPA
+		OpenSMOKE::OnTheFlyPostProcessing&		on_the_fly_post_processing_;	//!< on the fly post-processing
+		OpenSMOKE::PolimiSoot_Analyzer&			polimi_soot_analyzer_;			//!< on the fly soot analyzer (based on POLIMI)
+		OpenSMOKE::IgnitionDelayTimes_Analyzer&			idts_analyzer_;					//!< on the fly signition delay time analyzer
 
 protected:
 

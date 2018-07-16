@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -50,8 +50,7 @@ namespace OpenSMOKE
 		OpenSMOKE::OnTheFlyROPA& on_the_fly_ropa,
 		OpenSMOKE::OnTheFlyPostProcessing& on_the_fly_post_processing,
 		OpenSMOKE::IgnitionDelayTimes_Analyzer& idts_analyzer,
-		OpenSMOKE::PolimiSoot_Analyzer& polimi_soot_analyzer,
-		OpenSMOKE::VirtualChemistry& virtual_chemistry) :
+		OpenSMOKE::PolimiSoot_Analyzer& polimi_soot_analyzer) :
 		thermodynamicsMap_(thermodynamicsMap),
 		kineticsMap_(kineticsMap),
 		ode_parameters_(ode_parameters),
@@ -59,8 +58,7 @@ namespace OpenSMOKE
 		on_the_fly_ropa_(on_the_fly_ropa),
 		on_the_fly_post_processing_(on_the_fly_post_processing),
 		idts_analyzer_(idts_analyzer),
-		polimi_soot_analyzer_(polimi_soot_analyzer),
-		virtual_chemistry_(virtual_chemistry)
+		polimi_soot_analyzer_(polimi_soot_analyzer)
 	{
 	}
 
@@ -302,31 +300,6 @@ namespace OpenSMOKE
 		}
 	}
 
-	void PlugFlowReactor::PrepareParametricIDTASCIIFile(std::ofstream& fOutput, const boost::filesystem::path output_file_ascii)
-	{
-		if (idts_analyzer_.is_active() == true)
-		{
-			fOutput.open(output_file_ascii.c_str(), std::ios::out);
-
-			unsigned int counter = 1;
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "t[s]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "csi[m]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "T0[K]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "P0[Pa]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "V0[m3]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "T[K]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "P[Pa]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "v[m/s]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "rho[kg/m3]", counter);
-			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "MW[kg/kmol]", counter);
-
-			if (idts_analyzer_.is_active() == true)
-				idts_analyzer_.PrintHeaderLine(counter, fOutput);
-
-			fOutput << std::endl;
-		}
-	}
-
 	void PlugFlowReactor::PrepareASCIIFile(std::ofstream& fOutput, const boost::filesystem::path output_file_ascii)
 	{
 		indices_of_output_species_.resize(plugflow_options_.output_species().size());
@@ -444,6 +417,31 @@ namespace OpenSMOKE
 		fOutput << std::endl;
 	}
 
+	void PlugFlowReactor::PrepareParametricIDTASCIIFile(std::ofstream& fOutput, const boost::filesystem::path output_file_ascii)
+	{
+		if (idts_analyzer_.is_active() == true)
+		{
+			fOutput.open(output_file_ascii.c_str(), std::ios::out);
+
+			unsigned int counter = 1;
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "t[s]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "csi[m]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "T0[K]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "P0[Pa]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "v0[m/s]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "T[K]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "P[Pa]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "v[m/s]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "rho[kg/m3]", counter);
+			OpenSMOKE::PrintTagOnASCIILabel(20, fOutput, "MW[kg/kmol]", counter);
+
+			if (idts_analyzer_.is_active() == true)
+				idts_analyzer_.PrintHeaderLine(counter, fOutput);
+
+			fOutput << std::endl;
+		}
+	}
+
 	void PlugFlowReactor::PrepareASCIIFile(const boost::filesystem::path output_file_ascii)
 	{
 		PrepareASCIIFile(fASCII_, output_file_ascii);
@@ -454,7 +452,7 @@ namespace OpenSMOKE
 		if (idts_analyzer_.is_active())
 		{
 			fOutput.setf(std::ios::scientific);
-			fOutput << std::setw(20) << std::left << t;
+			fOutput << std::setw(20) << std::left << tau_;
 			fOutput << std::setw(20) << std::left << csi_;
 			fOutput << std::setw(20) << std::left << T0_;
 			fOutput << std::setw(20) << std::left << P0_;
@@ -727,7 +725,7 @@ namespace OpenSMOKE
 
 			if (plugflow_options_.verbose_ascii_file() == true)
 				PrepareASCIIFile(plugflow_options_.output_path() / "Output.out");
-
+			
 			if (plugflow_options_.verbose_xml_file() == true)
 				PrepareXMLFile(plugflow_options_.output_path() / "Output.xml");
 
@@ -741,6 +739,10 @@ namespace OpenSMOKE
 			// Prepare post-processing output files
 			if (on_the_fly_post_processing_.is_active() == true)
 				on_the_fly_post_processing_.PrepareOutputFiles();
+
+			// Ignition delay times
+			if (idts_analyzer_.is_active())
+				idts_analyzer_.Reset();
 		}
 	}
 
@@ -825,7 +827,6 @@ namespace OpenSMOKE
 			std::cout << std::setw(30) << std::left << "MW[kg/kmol]"	<< std::setw(20) << std::left << std::fixed << std::setprecision(5) << MW0_ << MW_ << std::endl;
 		
 			// Enthalpy analysis
-			if (virtual_chemistry_.is_active() == false)
 			{
 				const double H_ = thermodynamicsMap_.hMolar_Mixture_From_MoleFractions(x_.GetHandle());
 				const double U_ = thermodynamicsMap_.uMolar_Mixture_From_MoleFractions(x_.GetHandle());
@@ -833,16 +834,6 @@ namespace OpenSMOKE
 				std::cout << std::setw(30) << std::left << "H[J/kg]"			<< std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_/MW0_ << H_/MW_ << std::endl;
 				std::cout << std::setw(30) << std::left << "U[J/kg]"			<< std::setw(20) << std::left << std::scientific << std::setprecision(6) << U0_/MW0_ << U_/MW_  << std::endl;
 				std::cout << std::setw(30) << std::left << "E[J/kg]"			<< std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_/MW0_+v0_*v0_/2. << H_/MW_+v_*v_/2. << std::endl;
-			}
-
-			if (virtual_chemistry_.is_active() == true)
-			{
-				const double H_ = virtual_chemistry_.HMix(T_, P_, omega_.GetHandle()) * MW_;
-				const double U_ = H_ - PhysicalConstants::R_J_kmol*this->T_;
-
-				std::cout << std::setw(30) << std::left << "H[J/kg]" << std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_ / MW0_ << H_ / MW_ << std::endl;
-				std::cout << std::setw(30) << std::left << "U[J/kg]" << std::setw(20) << std::left << std::scientific << std::setprecision(6) << U0_ / MW0_ << U_ / MW_ << std::endl;
-				std::cout << std::setw(30) << std::left << "E[J/kg]" << std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_ / MW0_ + v0_ * v0_ / 2. << H_ / MW_ + v_ * v_ / 2. << std::endl;
 			}
 
 			for(unsigned int i=1;i<=NC_;i++)
@@ -933,7 +924,6 @@ namespace OpenSMOKE
 			fOut << std::setw(30) << std::left << "MW[kg/kmol]"		<< std::setw(20) << std::left << std::fixed << std::setprecision(5) << MW0_ << MW_ << std::endl;
 		
 			// Enthalpy analysis
-			if (virtual_chemistry_.is_active() == false)
 			{
 				const double H_ = thermodynamicsMap_.hMolar_Mixture_From_MoleFractions(x_.GetHandle());
 				const double U_ = thermodynamicsMap_.uMolar_Mixture_From_MoleFractions(x_.GetHandle());
@@ -941,16 +931,6 @@ namespace OpenSMOKE
 				fOut << std::setw(30) << std::left << "H[J/kg]"			<< std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_/MW0_ << H_/MW_ << std::endl;
 				fOut << std::setw(30) << std::left << "U[J/kg]"			<< std::setw(20) << std::left << std::scientific << std::setprecision(6) << U0_/MW0_ << U_/MW_ << std::endl;
 				fOut << std::setw(30) << std::left << "E[J/kg]"			<< std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_/MW0_+v0_*v0_/2. << H_/MW_+v_*v_/2. << std::endl;
-			}
-
-			if (virtual_chemistry_.is_active() == true)
-			{
-				const double H_ = virtual_chemistry_.HMix(T_, P_, omega_.GetHandle()) * MW_;
-				const double U_ = H_ - PhysicalConstants::R_J_kmol*this->T_;
-
-				std::cout << std::setw(30) << std::left << "H[J/kg]" << std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_ / MW0_ << H_ / MW_ << std::endl;
-				std::cout << std::setw(30) << std::left << "U[J/kg]" << std::setw(20) << std::left << std::scientific << std::setprecision(6) << U0_ / MW0_ << U_ / MW_ << std::endl;
-				std::cout << std::setw(30) << std::left << "E[J/kg]" << std::setw(20) << std::left << std::scientific << std::setprecision(6) << H0_ / MW0_ + v0_ * v0_ / 2. << H_ / MW_ + v_ * v_ / 2. << std::endl;
 			}
 
 			for(unsigned int i=1;i<=NC_;i++)

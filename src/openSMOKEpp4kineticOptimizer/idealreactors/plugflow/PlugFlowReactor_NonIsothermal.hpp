@@ -58,7 +58,6 @@ namespace OpenSMOKE
 								OpenSMOKE::OnTheFlyPostProcessing& on_the_fly_post_processing,
 								OpenSMOKE::IgnitionDelayTimes_Analyzer& idts_analyzer,
 								OpenSMOKE::PolimiSoot_Analyzer& polimi_soot_analyzer,
-								OpenSMOKE::VirtualChemistry& virtual_chemistry,
 								const bool time_independent, 
 								const bool constant_pressure, 
 								const double v0, const double T0, const double P0, 
@@ -67,7 +66,7 @@ namespace OpenSMOKE
                                 const double cross_section_over_perimeter,
                                 const double T_environment) :
 
-		PlugFlowReactor(thermodynamicsMap, kineticsMap, ode_parameters, plugflow_options, on_the_fly_ropa, on_the_fly_post_processing, idts_analyzer, polimi_soot_analyzer, virtual_chemistry)
+		PlugFlowReactor(thermodynamicsMap, kineticsMap, ode_parameters, plugflow_options, on_the_fly_ropa, on_the_fly_post_processing, idts_analyzer, polimi_soot_analyzer)
 	{
 		type_ = PLUGFLOW_REACTOR_NONISOTHERMAL;
 
@@ -84,9 +83,9 @@ namespace OpenSMOKE
 		P0_ = P0;
 		omega0_ = omega0;
                 
-        global_thermal_exchange_coefficient_ = global_thermal_exchange_coefficient;
-        cross_section_over_perimeter_ = cross_section_over_perimeter;
-        T_environment_ = T_environment;
+                global_thermal_exchange_coefficient_ = global_thermal_exchange_coefficient;
+                cross_section_over_perimeter_ = cross_section_over_perimeter;
+                T_environment_ = T_environment;
 
 		NC_ = thermodynamicsMap_.NumberOfSpecies();
 		NR_ = kineticsMap_.NumberOfReactions();
@@ -97,13 +96,6 @@ namespace OpenSMOKE
 		MW0_ = thermodynamicsMap_.MolecularWeight_From_MassFractions(omega0_.GetHandle());
 		rho0_ = P0_ * MW0_ / (PhysicalConstants::R_J_kmol*T0_);
 		specificmassflowrate_ = rho0_ * v0_;
-
-		if (virtual_chemistry_.is_active() == true)
-		{
-			MW0_ = virtual_chemistry_.MWMix(omega0_.GetHandle());
-			rho0_ = P0_ * MW0_ / (PhysicalConstants::R_J_kmol*T0_);
-			specificmassflowrate_ = rho0_ * v0_;
-		}
 
 		T_		= T0_;
 		P_		= P0_;
@@ -118,14 +110,6 @@ namespace OpenSMOKE
 		thermodynamicsMap_.SetTemperature(T0_);
 		H0_ = thermodynamicsMap_.hMolar_Mixture_From_MoleFractions(x0_.GetHandle());
 		U0_ = thermodynamicsMap_.uMolar_Mixture_From_MoleFractions(x0_.GetHandle());
-
-		if (virtual_chemistry_.is_active() == true)
-		{
-			MW0_ = virtual_chemistry_.MWMix(omega0_.GetHandle());
-			virtual_chemistry_.MoleFractions(MW0_, omega0_.GetHandle(), x0_.GetHandle());
-			H0_ = virtual_chemistry_.HMix(T0_, P0_, omega0_.GetHandle()) * MW0_;
-			U0_ = H0_ - PhysicalConstants::R_J_kmol*this->T0_;
-		}
 
 		OpenAllFiles();
 	}
@@ -154,90 +138,56 @@ namespace OpenSMOKE
 			csi_ = y[NC_+2];
 		}
 
-		if (virtual_chemistry_.is_active() == false)
+		// Calculates the volume and the concentrations of species
+		thermodynamicsMap_.MoleFractions_From_MassFractions(x_.GetHandle(), MW_, omega_.GetHandle());
+		if (constant_pressure_ == true)
 		{
-			// Calculates the volume and the concentrations of species
-			thermodynamicsMap_.MoleFractions_From_MassFractions(x_.GetHandle(), MW_, omega_.GetHandle());
-			if (constant_pressure_ == true)
-			{
-				cTot_ = P_ / (PhysicalConstants::R_J_kmol * T_);
-				Product(cTot_, x_, &c_);
-				rho_ = cTot_ * MW_;
-				v_ = specificmassflowrate_ / rho_;
-			}
-			else
-			{
-				P_ = specificmassflowrate_ / v_ * PhysicalConstants::R_J_kmol * T_ / MW_;
-				cTot_ = P_ / (PhysicalConstants::R_J_kmol * T_);
-				Product(cTot_, x_, &c_);
-				rho_ = cTot_ * MW_;
-			}
-
-			// Calculates thermodynamic properties
-			thermodynamicsMap_.SetTemperature(T_);
-			thermodynamicsMap_.SetPressure(P_);
-
-			const double CpMixMolar = thermodynamicsMap_.cpMolar_Mixture_From_MoleFractions(x_.GetHandle());
-			CvMixMass_ = (CpMixMolar - PhysicalConstants::R_J_kmol) / MW_;
-			CpMixMass_ = CpMixMolar / MW_;
-
-			// Calculates kinetics
-			kineticsMap_.SetTemperature(T_);
-			kineticsMap_.SetPressure(P_);
-
-			//kineticsMap_.KineticConstants();
-			kineticsMap_.ReactionRates(c_.GetHandle());
-			kineticsMap_.FormationRates(R_.GetHandle());
-			QR_ = kineticsMap_.HeatRelease(R_.GetHandle());
+			cTot_ = P_/(PhysicalConstants::R_J_kmol * T_);
+			Product(cTot_, x_, &c_);
+			rho_ = cTot_*MW_;
+			v_ = specificmassflowrate_/rho_;
+		}
+		else
+		{
+			P_ = specificmassflowrate_/v_ * PhysicalConstants::R_J_kmol * T_ / MW_;
+			cTot_ = P_/(PhysicalConstants::R_J_kmol * T_);
+			Product(cTot_, x_, &c_);
+			rho_ = cTot_*MW_;
 		}
 
-		if (virtual_chemistry_.is_active() == true)
-		{
-			// Molecular weight and mole fractiosn
-			MW_ = virtual_chemistry_.MWMix(omega_.GetHandle());
-			virtual_chemistry_.MoleFractions(MW_, omega_.GetHandle(), x_.GetHandle());
+		// Calculates thermodynamic properties
+		thermodynamicsMap_.SetTemperature(T_);
+		thermodynamicsMap_.SetPressure(P_);
+		
+		const double CpMixMolar = thermodynamicsMap_.cpMolar_Mixture_From_MoleFractions(x_.GetHandle());
+		CvMixMass_ = (CpMixMolar - PhysicalConstants::R_J_kmol) / MW_;
+		CpMixMass_ = CpMixMolar / MW_;
 
-			// Velocity
-			if (constant_pressure_ == true)
-			{
-				cTot_ = P_ / (PhysicalConstants::R_J_kmol * T_);
-				Product(cTot_, x_, &c_);
-				rho_ = cTot_ * MW_;
-				v_ = specificmassflowrate_ / rho_;
-			}
-			else
-			{
-				P_ = specificmassflowrate_ / v_ * PhysicalConstants::R_J_kmol * T_ / MW_;
-				cTot_ = P_ / (PhysicalConstants::R_J_kmol * T_);
-				Product(cTot_, x_, &c_);
-				rho_ = cTot_ * MW_;
-			}
-
-			// Specific heat at constant pressure
-			CpMixMass_ = virtual_chemistry_.CpMix(T_, P_, omega_.GetHandle());
-			const double CpMixMolar = CpMixMass_ * MW_;
-			CvMixMass_ = (CpMixMolar - PhysicalConstants::R_J_kmol) / MW_;
-
-			// Calculates the formation rates of species [kg/m3/s]
-			virtual_chemistry_.FormationRates(cTot_, MW_, T_, omega_.GetHandle(), R_.GetHandle());
-
-			// Calculates the reaction heat [W/m3]
-			QR_ = virtual_chemistry_.Qdot(T_, P_, R_.GetHandle());
-		}
+		// Calculates kinetics
+		kineticsMap_.SetTemperature(T_);
+		kineticsMap_.SetPressure(P_);
+		
+		//kineticsMap_.KineticConstants();
+		kineticsMap_.ReactionRates(c_.GetHandle());
+		kineticsMap_.FormationRates(R_.GetHandle());
+		QR_ = kineticsMap_.HeatRelease(R_.GetHandle());
 
 		// Recovering residuals
 		for (unsigned int i=1;i<=NC_;++i)	
 			dy[i] = thermodynamicsMap_.MW(i-1)*R_[i]/rho_/v_;
 
-		// Energy
+		// Exchange of heat with external environment
+		double Qexchange = 0.;
+		if (global_thermal_exchange_coefficient_ != 0.)
+			Qexchange = global_thermal_exchange_coefficient_ / cross_section_over_perimeter_ * (T_environment_ - T_);		// [W/m3]
+
+		// Energy equation
 		const double v2 = v_*v_;
 		const double Beta = 1.;
-		const double delta = R_.SumElements()*MW_/rho_/v_;				// [1/m]
-		const double T_coefficient = CpMixMass_ + v2/Beta/T_;                           // [m2/s2/K]
-		const double T_extra_terms = -v2/Beta*delta;					// [m/s2]
-		const double Qexchange = global_thermal_exchange_coefficient_ / 
-                                         cross_section_over_perimeter_*(T_environment_-T_);     // [W/m3]
-        dy[NC_+1] = ( (QR_+Qexchange)/rho_/v_ + T_extra_terms) / T_coefficient;         // [K/m]
+		const double delta = R_.SumElements()*MW_/rho_/v_;						// [1/m]
+		const double T_coefficient = CpMixMass_ + v2/Beta/T_;					// [m2/s2/K]
+		const double T_extra_terms = -v2/Beta*delta;							// [m/s2]
+        dy[NC_+1] = ( (QR_+Qexchange)/rho_/v_ + T_extra_terms) / T_coefficient;	// [K/m]
 	
 		// Time-axial coordinate
 		if (time_independent_ == true)	dy[NC_+2] = 1.;
@@ -278,7 +228,7 @@ namespace OpenSMOKE
 				std::cout << std::endl;
 			}
 		}
-
+		
 		if (plugflow_options_.verbose_output() == true)
 		{
 			// ASCII file output
@@ -331,7 +281,7 @@ namespace OpenSMOKE
 			if (polimi_soot_analyzer_.is_active() == true)
 				PolimiSootAnalysis(t);
 		}
-
+		
 		// Ignition delay times (on the fly)
 		if (idts_analyzer_.is_active() == true)
 			idts_analyzer_.Analyze(tau_, T_, P_, x_.GetHandle());

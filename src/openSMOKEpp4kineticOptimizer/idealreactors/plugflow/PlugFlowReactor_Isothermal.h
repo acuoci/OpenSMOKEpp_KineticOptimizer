@@ -71,10 +71,9 @@ namespace OpenSMOKE
 		*@param ode_parameters parameters governing the solution of the stiff ODE system
 		*@param plugflow_options options governing the output
 		*@param on_the_fly_ropa rate of production analysis (on the fly)
-		*@param on_the_fly_post_processing post-processing analysis (on the fly)
 		*@param idt_analyzer ignition delay time analyzer (on the fly)
+		*@param on_the_fly_post_processing post-processing analysis (on the fly)
 		*@param polimi_soot_analyzer soot analyzer (on the fly)
-		*@param virtual_chemistry virtual chemistry
 		*@param v0 initial velocity [m/s]
 		*@param T0 initial temperature [K]
 		*@param P0 initial pressure [Pa]
@@ -88,7 +87,6 @@ namespace OpenSMOKE
 													OpenSMOKE::OnTheFlyPostProcessing& on_the_fly_post_processing,
 													OpenSMOKE::IgnitionDelayTimes_Analyzer& idts_analyzer,
 			                                        OpenSMOKE::PolimiSoot_Analyzer& polimi_soot_analyzer,
-													OpenSMOKE::VirtualChemistry& virtual_chemistry,
 													const bool time_independent, 
 													const bool constant_pressure, 
 													const double v0, const double T0, const double P0, 
