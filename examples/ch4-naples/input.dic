@@ -16,7 +16,10 @@ Dictionary Optimizer
 {
 		@KineticsFolder				kinetic-mechanism/kinetics;
 		
-		@Algorithm 					OpenSMOKEpp-Simplex;	// OpenSMOKEpp-Simplex | LN_COBYLA | GN_DIRECTA | GN_CRS2_LM
+		@Algorithm 					SLSQP;	// OpenSMOKEpp-Simplex | DIRECT | CRS | MLSL | STOGO | ISRES | ESCH | COBYLA | BOBYQA |NEWUOA | PRAXIS | NELDERMEAD | SBPLX | SLSQP | LBFGS | TNEWTON_PRECOND | SLM_VAR
+		@Variant					NONE;
+		@CentralGradient			true;
+		
 		@MaxIterations				10000;
 		@RelativeErrors				true;
 		
