@@ -43,12 +43,12 @@
 #include <math.h>
 
 // NLopt library
-#ifdef NLOPT_LIB==1
+#if NLOPT_LIB == 1
 #include <nlopt.h>
 #endif
 
 // Optim library
-#ifdef OPTIM_LIB==1
+#if OPTIM_LIB == 1
 #include "optim/optim.hpp"
 #endif
 
@@ -75,11 +75,11 @@ void WriteFinalResult(const Eigen::VectorXd& real_parameters_0, const Eigen::Vec
 
 double OptFunction(const Eigen::VectorXd &b);
 
-#ifdef NLOPT_LIB==1
+#if NLOPT_LIB == 1
 double NLOptFunction(unsigned n, const double *x, double *grad, void *my_func_data);
 #endif
 
-#ifdef OPTIM_LIB==1
+#if OPTIM_LIB == 1
 double OPTIMFunction(const arma::vec& x, arma::vec* grad_out, void* opt_data);
 #endif
 
@@ -473,7 +473,7 @@ int main(int argc, char** argv)
 			mr.GetSolution(bOpt);
 		}
 
-		#ifdef NLOPT_LIB==1
+		#if NLOPT_LIB == 1
 		else if (	algorithm == "DIRECT" || algorithm == "CRS" ||
 					algorithm == "MLSL" || algorithm == "STOGO" ||
 					algorithm == "ISRES" || algorithm == "ESCH" ||
@@ -661,7 +661,7 @@ int main(int argc, char** argv)
 		}
 		#endif
 
-		#ifdef OPTIM_LIB==1
+		#if OPTIM_LIB == 1
 		else if ( algorithm == "OPTIM-DE" || algorithm == "OPTIM-PSO" || algorithm == "OPTIM-NM")
 		{
 			arma::vec lb(number_parameters);
@@ -882,7 +882,7 @@ double OptFunction(const Eigen::VectorXd &b)
 	return ReturnObjFunction(real_parameters);
 }
 
-#ifdef NLOPT_LIB==1
+#if NLOPT_LIB == 1
 double NLOptFunction(unsigned n, const double *x, double *grad, void *my_func_data)
 {
 	Eigen::VectorXd b(number_parameters);
@@ -962,7 +962,7 @@ double NLOptFunction(unsigned n, const double *x, double *grad, void *my_func_da
 }
 #endif
 
-#ifdef OPTIM_LIB==1
+#if OPTIM_LIB == 1
 double OPTIMFunction(const arma::vec& x, arma::vec* grad_out, void* opt_data)
 {
 	Eigen::VectorXd b(number_parameters);

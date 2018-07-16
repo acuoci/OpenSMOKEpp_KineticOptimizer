@@ -24,12 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\..\..\..\..\Development\OpenSMOKEpp\OpenSMOKEpp\source\math\native-minimization-solvers\MinimizationSimplex.h">
-      <Filter>Source Files\optimizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\..\..\..\Development\OpenSMOKEpp\OpenSMOKEpp\source\math\native-minimization-solvers\MinimizationSimplex.hpp">
-      <Filter>Source Files\optimizer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\Grammar_KineticOptimizer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -53,6 +47,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\pfr\PlugFlowReactorExperiment.hpp">
       <Filter>Source Files\pfr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\..\..\..\..\Development\OpenSMOKEpp\OpenSMOKEpp\source\math\native-minimization-solvers\MinimizationSimplex.h">
+      <Filter>Source Files\optimizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\..\..\..\..\Development\OpenSMOKEpp\OpenSMOKEpp\source\math\native-minimization-solvers\MinimizationSimplex.hpp">
+      <Filter>Source Files\optimizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
