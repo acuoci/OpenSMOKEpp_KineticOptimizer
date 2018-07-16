@@ -43,7 +43,6 @@
 #include "utilities/cema/OnTheFlyCEMA.h"
 #include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
 #include "utilities/soot/polimi/OpenSMOKE_PolimiSoot_Analyzer.h"
-#include "utilities/virtualchemistry/VirtualChemistry.h"
 
 // Standard plug flow reactors
 #include "Grammar_PlugFlowReactorExperiment.h"
@@ -89,7 +88,6 @@ namespace OpenSMOKE
 		OpenSMOKE::PlugFlowReactor_Options*		plugflow_options_;
 		OpenSMOKE::ODE_Parameters*				ode_parameters_;
 		OpenSMOKE::SensitivityAnalysis_Options*	sensitivity_options_;
-		OpenSMOKE::VirtualChemistry*			virtual_chemistry_;
 		OpenSMOKE::IgnitionDelayTimes_Analyzer*	idt;
 
 		double end_value_;

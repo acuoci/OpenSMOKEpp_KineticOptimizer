@@ -292,6 +292,7 @@ int main(int argc, char** argv)
 	if (dictionaries(main_dictionary_name_).CheckOption("@Variant") == true)
 		dictionaries(main_dictionary_name_).ReadString("@Variant", variant);
 
+	// Central/forward gradient
 	central_difference = false;
 	if (dictionaries(main_dictionary_name_).CheckOption("@CentralGradient") == true)
 		dictionaries(main_dictionary_name_).ReadBool("@CentralGradient", central_difference);

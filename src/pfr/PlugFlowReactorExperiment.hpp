@@ -367,9 +367,6 @@ namespace OpenSMOKE
 			}
 		}
 
-		// Virtual chemistry
-		virtual_chemistry_ = new OpenSMOKE::VirtualChemistry(*thermodynamicsMapXML_, false);
-
 		// ------------------------------------------------------------------------------------------- //
 		//                              Non parametric analysis                                        //
 		// ------------------------------------------------------------------------------------------- //
@@ -377,7 +374,7 @@ namespace OpenSMOKE
 		if (type_ == OpenSMOKE::PLUGFLOW_REACTOR_ISOTHERMAL)
 		{
 			plugflow_isothermal_ = new OpenSMOKE::PlugFlowReactor_Isothermal(*thermodynamicsMapXML, *kineticsMapXML,
-				*ode_parameters_, *plugflow_options_, *onTheFlyROPA_, *on_the_fly_post_processing_, *idt, *polimi_soot_, *virtual_chemistry_, time_independent_variable, constant_pressure,
+				*ode_parameters_, *plugflow_options_, *onTheFlyROPA_, *on_the_fly_post_processing_, *idt, *polimi_soot_, time_independent_variable, constant_pressure,
 				velocity, T, P_Pa, omega);
 
 			if (temperature_profile == true)
@@ -388,7 +385,7 @@ namespace OpenSMOKE
 		else if (type_ == OpenSMOKE::PLUGFLOW_REACTOR_NONISOTHERMAL)
 		{
 			plugflow_non_isothermal_ = new OpenSMOKE::PlugFlowReactor_NonIsothermal(*thermodynamicsMapXML, *kineticsMapXML,
-				*ode_parameters_, *plugflow_options_, *onTheFlyROPA_, *on_the_fly_post_processing_, *idt, *polimi_soot_, *virtual_chemistry_, time_independent_variable, constant_pressure,
+				*ode_parameters_, *plugflow_options_, *onTheFlyROPA_, *on_the_fly_post_processing_, *idt, *polimi_soot_, time_independent_variable, constant_pressure,
 				velocity, T, P_Pa, omega,
 				global_thermal_exchange_coefficient, cross_section_over_perimeter, T_environment);
 		}
