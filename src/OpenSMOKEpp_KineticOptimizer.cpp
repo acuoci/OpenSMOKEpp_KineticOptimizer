@@ -39,9 +39,18 @@
 #include <omp.h>
 #endif
 
-// NLopt
+// Math library
 #include <math.h>
+
+// NLopt library
+#ifdef NLOPT_LIB==1
 #include <nlopt.h>
+#endif
+
+// Optim library
+#ifdef OPTIM_LIB==1
+#include "optim/optim.hpp"
+#endif
 
 // OpenSMOKE++ Definitions
 #include "OpenSMOKEpp"
@@ -65,7 +74,14 @@ void FromRealParametersToMinimizationParameters(const Eigen::VectorXd& parameter
 void WriteFinalResult(const Eigen::VectorXd& real_parameters_0, const Eigen::VectorXd& real_parameters);
 
 double OptFunction(const Eigen::VectorXd &b);
+
+#ifdef NLOPT_LIB==1
 double NLOptFunction(unsigned n, const double *x, double *grad, void *my_func_data);
+#endif
+
+#ifdef OPTIM_LIB==1
+double OPTIMFunction(const arma::vec& x, arma::vec* grad_out, void* opt_data);
+#endif
 
 OpenSMOKE::BatchReactorExperiment* batch_reactors;
 OpenSMOKE::PlugFlowReactorExperiment* plugflow_reactors;
@@ -457,6 +473,7 @@ int main(int argc, char** argv)
 			mr.GetSolution(bOpt);
 		}
 
+		#ifdef NLOPT_LIB==1
 		else if (	algorithm == "DIRECT" || algorithm == "CRS" ||
 					algorithm == "MLSL" || algorithm == "STOGO" ||
 					algorithm == "ISRES" || algorithm == "ESCH" ||
@@ -642,6 +659,56 @@ int main(int argc, char** argv)
 					bOpt(i) = x[i];
 			}
 		}
+		#endif
+
+		#ifdef OPTIM_LIB==1
+		else if ( algorithm == "OPTIM-DE" || algorithm == "OPTIM-PSO" || algorithm == "OPTIM-NM")
+		{
+			arma::vec lb(number_parameters);
+			arma::vec ub(number_parameters);
+			arma::vec x(number_parameters);
+			for (unsigned int i = 0; i < number_parameters; i++)
+			{
+				lb[i] = bMin(i);
+				ub[i] = bMax(i);
+				x[i] = b0(i);
+			}
+
+			optim::algo_settings_t settings;
+			settings.vals_bound = true;
+			settings.lower_bounds = lb;
+			settings.upper_bounds = ub;
+
+			std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+
+			bool success = false;
+			if (algorithm == "OPTIM-DE")
+				success = optim::de(x,OPTIMFunction,nullptr, settings);
+			else if (algorithm == "OPTIM-PSO")
+				success = optim::pso(x,OPTIMFunction,nullptr, settings);
+			else if (algorithm == "OPTIM-NM")
+				success = optim::nm(x,OPTIMFunction,nullptr, settings);			
+
+			std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+			std::chrono::duration<double> elapsed_seconds = end-start;
+
+			if (success == true) 
+			{
+				std::cout << "OPTIM: Optimization successfully completed" << std::endl;
+				std::cout << "       Elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
+
+				for (unsigned int i = 0; i < number_parameters; i++)
+					bOpt(i) = x[i];
+			} 
+			else 
+			{
+				std::cout << "OPTIM failed" << std::endl;
+				getchar();
+				exit(-1);
+			}
+		}
+		#endif
+
 		else
 		{
 			OpenSMOKE::FatalErrorMessage("Error @Algorithm option:	OpenSMOKEpp-Simplex | DIRECT | CRS | MLSL | STOGO | ISRES | ESCH | \
@@ -815,6 +882,7 @@ double OptFunction(const Eigen::VectorXd &b)
 	return ReturnObjFunction(real_parameters);
 }
 
+#ifdef NLOPT_LIB==1
 double NLOptFunction(unsigned n, const double *x, double *grad, void *my_func_data)
 {
 	Eigen::VectorXd b(number_parameters);
@@ -892,6 +960,20 @@ double NLOptFunction(unsigned n, const double *x, double *grad, void *my_func_da
 
 	return f;
 }
+#endif
+
+#ifdef OPTIM_LIB==1
+double OPTIMFunction(const arma::vec& x, arma::vec* grad_out, void* opt_data)
+{
+	Eigen::VectorXd b(number_parameters);
+	for (unsigned int i = 0; i < number_parameters; i++)
+		b(i) = x[i];
+
+	const double f = OptFunction(b);
+
+	return f;
+}
+#endif
 
 void FromMinimizationParametersToRealParameters(const Eigen::VectorXd& b, Eigen::VectorXd& real_parameters)
 {
