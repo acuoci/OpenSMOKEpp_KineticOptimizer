@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -18,7 +18,7 @@
 |                                                                         |
 |	License                                                               |
 |                                                                         |
-|   Copyright(C) 2018  Alberto Cuoci                                      |
+|   Copyright(C) 2014, 2013, 2012  Alberto Cuoci                          |
 |   OpenSMOKE++ is free software: you can redistribute it and/or modify   |
 |   it under the terms of the GNU General Public License as published by  |
 |   the Free Software Foundation, either version 3 of the License, or     |
@@ -34,72 +34,48 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#ifndef NlsSolverUtilities_H
+#define NlsSolverUtilities_H
 
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/Utilities.h"
-#include "idealreactors/utilities/Grammar_LewisNumbers.h"
-
-// 1D grid
-#include "utilities/grids/adaptive/Grid1D.h"
-#include "utilities/grids/adaptive/Grammar_Grid1D.h"
-#include "utilities/grids/adaptive/Adapter_Grid1D.h"
-
-// Hybrid Method of Moments
-#include "utilities/soot/hmom/HMOM.h"
-
-#include "OptimizationRules_Premixed1DFlameExperiment.h"
-#include "Grammar_Premixed1DFlameExperiment.h"
-#include "OpenSMOKE_PremixedLaminarFlame1D.h"
-
-
-namespace OpenSMOKE
+namespace NlsSMOKE
 {
-	class Premixed1DFlameExperiment
+
+	enum NlsStatus
 	{
-	public:
+		NLS_INITIALIZATION_STATE = 0,
+		NLS_CONTINUATION_STATE = 1,
+		NLS_NEWTON_OK_STATE = 2,
+		NLS_QUASI_NEWTON_OK_STATE = 3,
+		NLS_GRADIENT_OK_STATE = 4,
+		NLS_PHINEW_OK_STATE = 5,
+		NLS_PHIW_OK_STATE = 6,
+		NLS_DUBIOUS_STATE = 7,
+		NLS_MAX_NEWTON_CALLS = 8,
 
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
-					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
-
-		void Solve(const bool verbose = false);
-
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
-
-		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
-
-	private:
-
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
-		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
-
-		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
-		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
-		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
-		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
-
-		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
-		OpenSMOKE::Grid1D* grid;
-		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
-		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
-		OpenSMOKE::HMOM* hmom;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
+		NLS_EXCESSIVE_WORK_STATE = -1,
+		NLS_STOP_FOUND = -2,
+		NLS_NOT_INITIALIZED = -3,
+		NLS_STOP_FOR_BAD_CONVERGENCE = -5
 	};
+
+
+	enum NlsMethod
+	{
+		NEWTON,
+		QUASI_NEWTON,
+		ONED_SEARCH_FIRSTCALL,
+		ONED_SEARCH_SECONDCALL,
+		GRADIENT
+	};
+
+
+	enum NlsWeights
+	{
+		AUTOMATIC_WEIGHTS,
+		FIXED_WEIGHTS,
+		UNITARY_WEIGHTS
+	};
+
 }
 
-#include "Premixed1DFlameExperiment.hpp"
-
-#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#endif // NlsSolverUtilities_H

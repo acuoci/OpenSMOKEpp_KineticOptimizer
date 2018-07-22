@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -18,7 +18,7 @@
 |                                                                         |
 |	License                                                               |
 |                                                                         |
-|   Copyright(C) 2018  Alberto Cuoci                                      |
+|   Copyright(C) 2014, 2013, 2012  Alberto Cuoci                          |
 |   OpenSMOKE++ is free software: you can redistribute it and/or modify   |
 |   it under the terms of the GNU General Public License as published by  |
 |   the Free Software Foundation, either version 3 of the License, or     |
@@ -34,72 +34,35 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#ifndef OpenSMOKE_PremixedLaminarFlame1D_Utilities_H
+#define OpenSMOKE_PremixedLaminarFlame1D_Utilities_H
 
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/Utilities.h"
-#include "idealreactors/utilities/Grammar_LewisNumbers.h"
+	/**
+	*@brief Reads a solution from a backup file
+	*@param path_file path to the backup file
+	*@param x axial coordinate [m]
+	*@param T temperatures [K]
+	*@param P pressure profile [Pa]
+	*@param m mass flow rate profile [kg/m2/s]
+	*@param omega species mass fractions profiles
+	*@param names_species names of species
+	*/
+	void ReadFromBackupFile(const boost::filesystem::path path_file, std::vector<double>& x, std::vector<double>& T, std::vector<double>& P, 
+							std::vector<double>& m, std::vector< std::vector<double> >& omega, std::vector<std::string>& names_species);
 
-// 1D grid
-#include "utilities/grids/adaptive/Grid1D.h"
-#include "utilities/grids/adaptive/Grammar_Grid1D.h"
-#include "utilities/grids/adaptive/Adapter_Grid1D.h"
+	/**
+	*@brief Reads a solution from a backup file
+	*@param path_file path to the backup file
+	*@param thermodynamicsMap thermodynamic map from which names of species can be extracted
+	*@param x axial coordinate [m]
+	*@param T temperatures [K]
+	*@param P pressure profile [Pa]
+	*@param m mass flow rate profile [kg/m2/s]
+	*@param omega species mass fractions profiles
+	*/
+	void ReadFromBackupFile(const boost::filesystem::path path_file, OpenSMOKE::ThermodynamicsMap_CHEMKIN& thermodynamicsMap,
+							std::vector<double>& x, std::vector<double>& T, std::vector<double>& P, std::vector<double>& m, std::vector< std::vector<double> >& omega);
 
-// Hybrid Method of Moments
-#include "utilities/soot/hmom/HMOM.h"
+#include "Utilities.hpp"
 
-#include "OptimizationRules_Premixed1DFlameExperiment.h"
-#include "Grammar_Premixed1DFlameExperiment.h"
-#include "OpenSMOKE_PremixedLaminarFlame1D.h"
-
-
-namespace OpenSMOKE
-{
-	class Premixed1DFlameExperiment
-	{
-	public:
-
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
-					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
-
-		void Solve(const bool verbose = false);
-
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
-
-		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
-
-	private:
-
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
-		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
-
-		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
-		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
-		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
-		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
-
-		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
-		OpenSMOKE::Grid1D* grid;
-		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
-		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
-		OpenSMOKE::HMOM* hmom;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
-	};
-}
-
-#include "Premixed1DFlameExperiment.hpp"
-
-#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#endif

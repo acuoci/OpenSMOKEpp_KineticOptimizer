@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -18,7 +18,7 @@
 |                                                                         |
 |	License                                                               |
 |                                                                         |
-|   Copyright(C) 2018  Alberto Cuoci                                      |
+|   Copyright(C) 2014, 2013, 2012  Alberto Cuoci                          |
 |   OpenSMOKE++ is free software: you can redistribute it and/or modify   |
 |   it under the terms of the GNU General Public License as published by  |
 |   the Free Software Foundation, either version 3 of the License, or     |
@@ -34,72 +34,58 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/Utilities.h"
-#include "idealreactors/utilities/Grammar_LewisNumbers.h"
-
-// 1D grid
-#include "utilities/grids/adaptive/Grid1D.h"
-#include "utilities/grids/adaptive/Grammar_Grid1D.h"
-#include "utilities/grids/adaptive/Adapter_Grid1D.h"
-
-// Hybrid Method of Moments
-#include "utilities/soot/hmom/HMOM.h"
-
-#include "OptimizationRules_Premixed1DFlameExperiment.h"
-#include "Grammar_Premixed1DFlameExperiment.h"
-#include "OpenSMOKE_PremixedLaminarFlame1D.h"
-
+#ifndef OpenSMOKE_FixedProfile_H
+#define OpenSMOKE_FixedProfile_H
 
 namespace OpenSMOKE
 {
-	class Premixed1DFlameExperiment
+	class FixedProfile
 	{
 	public:
 
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
-					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
+		/**
+		*@brief Default constructor
+		*@param n number of grid points
+		*@param x vector of abscissas
+		*@param x vector of ordinates
+		*/
+		FixedProfile(const unsigned int n, const double* x, const double* y);
 
-		void Solve(const bool verbose = false);
+		/**
+		*@brief Returns the abscissas
+		*/
+		const Eigen::VectorXd& x() const { return x_; }
 
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
+		/**
+		*@brief Retrurns the ordinates
+		*/
+		const Eigen::VectorXd& y() const { return y_; }
 
-		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
+		/**
+		*@brief Perform the interpolation based on the stored profile
+		*@param x vector of points where to perform the interpolation
+		*@param y interpolated ordinates
+		*/
+		void Interpolate(const Eigen::VectorXd& x, Eigen::VectorXd& y);
+
+		/**
+		*@brief Perform the interpolation based on the stored profile (without checks on the boundaries)
+		*@param x vector of points where to perform the interpolation
+		*@param y interpolated ordinates
+		*/
+		void InterpolateWithoutChecks(const Eigen::VectorXd& x, Eigen::VectorXd& y);
 
 	private:
 
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
-		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
-
-		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
-		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
-		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
-		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
-
-		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
-		OpenSMOKE::Grid1D* grid;
-		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
-		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
-		OpenSMOKE::HMOM* hmom;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
+		Eigen::VectorXd x_;		//!< vector of abscissas
+		Eigen::VectorXd y_;		//!< vector of ordinates
+		double xstart_;			//!< first abscissa
+		double xend_;			//!< last abscissa
+		unsigned int n_;		//!< number of points
 	};
+
 }
 
-#include "Premixed1DFlameExperiment.hpp"
+#include "FixedProfile.hpp"
 
-#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#endif	// OpenSMOKE_FixedProfile_H

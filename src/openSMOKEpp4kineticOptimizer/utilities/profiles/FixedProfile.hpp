@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -18,7 +18,7 @@
 |                                                                         |
 |	License                                                               |
 |                                                                         |
-|   Copyright(C) 2018  Alberto Cuoci                                      |
+|   Copyright(C) 2014, 2013, 2012  Alberto Cuoci                          |
 |   OpenSMOKE++ is free software: you can redistribute it and/or modify   |
 |   it under the terms of the GNU General Public License as published by  |
 |   the Free Software Foundation, either version 3 of the License, or     |
@@ -34,72 +34,62 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/Utilities.h"
-#include "idealreactors/utilities/Grammar_LewisNumbers.h"
-
-// 1D grid
-#include "utilities/grids/adaptive/Grid1D.h"
-#include "utilities/grids/adaptive/Grammar_Grid1D.h"
-#include "utilities/grids/adaptive/Adapter_Grid1D.h"
-
-// Hybrid Method of Moments
-#include "utilities/soot/hmom/HMOM.h"
-
-#include "OptimizationRules_Premixed1DFlameExperiment.h"
-#include "Grammar_Premixed1DFlameExperiment.h"
-#include "OpenSMOKE_PremixedLaminarFlame1D.h"
-
-
 namespace OpenSMOKE
 {
-	class Premixed1DFlameExperiment
+
+	FixedProfile::FixedProfile(const unsigned int n, const double* x, const double* y)
 	{
-	public:
+		n_ = n;
+		x_.resize(n_);
+		y_.resize(n_);
+		for (unsigned int i = 0; i < n_; i++)
+		{
+			x_(i) = x[i];
+			y_(i) = y[i];
+		}
+	}
 
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
-					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
+	void FixedProfile::Interpolate(const Eigen::VectorXd& xx, Eigen::VectorXd& yy)
+	{
+		yy.resize(xx.size());
 
-		void Solve(const bool verbose = false);
+		if (std::fabs(x_(0) - xx(0)) > 1.e-12)
+			OpenSMOKE::FatalErrorMessage("Interpolating fixed profile: the requested coordinate is smaller than the minimum available coordinate");
 
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
+		if (std::fabs(xx(xx.size() - 1) - x_(n_ - 1)) > 1.e-12)
+			OpenSMOKE::FatalErrorMessage("Interpolating fixed profile: the requested coordinate is larger than the maximum available coordinate");
 
-		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
+		yy(0) = y_(0);
+		yy(yy.size() - 1) = y_(y_.size() - 1);
 
-	private:
+		for (int i = 1; i < xx.size() - 1; i++)
+		{
+			for (unsigned int j = 1; j < n_; j++)
+			{
+				if (xx(i) <= x_(j))
+				{
+					yy(i) = y_(j - 1) + (y_(j) - y_(j - 1)) / (x_(j) - x_(j - 1)) * (xx(i) - x_(j - 1));
+					break;
+				}
+			}
+		}
+	}
 
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
-		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
+	void FixedProfile::InterpolateWithoutChecks(const Eigen::VectorXd& xx, Eigen::VectorXd& yy)
+	{
+		yy.resize(xx.size());
 
-		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
-		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
-		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
-		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
+		for (int i = 0; i < xx.size(); i++)
+		{
+			for (unsigned int j = 1; j < n_; j++)
+			{
+				if (xx(i) <= x_(j))
+				{
+					yy(i) = y_(j - 1) + (y_(j) - y_(j - 1)) / (x_(j) - x_(j - 1)) * (xx(i) - x_(j - 1));
+					break;
+				}
+			}
+		}
+	}
 
-		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
-		OpenSMOKE::Grid1D* grid;
-		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
-		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
-		OpenSMOKE::HMOM* hmom;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
-	};
 }
-
-#include "Premixed1DFlameExperiment.hpp"
-
-#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H

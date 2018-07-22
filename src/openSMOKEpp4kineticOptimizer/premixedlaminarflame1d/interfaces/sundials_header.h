@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -18,7 +18,7 @@
 |                                                                         |
 |	License                                                               |
 |                                                                         |
-|   Copyright(C) 2018  Alberto Cuoci                                      |
+|   Copyright(C) 2014, 2013, 2012  Alberto Cuoci                          |
 |   OpenSMOKE++ is free software: you can redistribute it and/or modify   |
 |   it under the terms of the GNU General Public License as published by  |
 |   the Free Software Foundation, either version 3 of the License, or     |
@@ -34,72 +34,75 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#include <sunmatrix/sunmatrix_dense.h> /* access to dense SUNMatrix            */
+#include <sunmatrix/sunmatrix_band.h>  /* access to dense SUNMatrix            */
+#include <sunlinsol/sunlinsol_dense.h> /* access to dense SUNLinearSolver      */
+#include <sunlinsol/sunlinsol_band.h>  /* access to band SUNLinearSolver       */
 
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/Utilities.h"
-#include "idealreactors/utilities/Grammar_LewisNumbers.h"
+#include <ida/ida.h>
+#include <ida/ida_direct.h>            /* access to IDADls interface           */
 
-// 1D grid
-#include "utilities/grids/adaptive/Grid1D.h"
-#include "utilities/grids/adaptive/Grammar_Grid1D.h"
-#include "utilities/grids/adaptive/Adapter_Grid1D.h"
+#include <kinsol/kinsol.h>
+#include <kinsol/kinsol_direct.h>      /* access to KINDls interface      */
 
-// Hybrid Method of Moments
-#include "utilities/soot/hmom/HMOM.h"
+#include <nvector/nvector_serial.h>
+#include <sundials/sundials_types.h>
 
-#include "OptimizationRules_Premixed1DFlameExperiment.h"
-#include "Grammar_Premixed1DFlameExperiment.h"
-#include "OpenSMOKE_PremixedLaminarFlame1D.h"
-
-
-namespace OpenSMOKE
+static int check_flag(void *flagvalue, char *funcname, int opt)
 {
-	class Premixed1DFlameExperiment
+	// 0. Check if SUNDIALS function returned NULL pointer - no memory allocated 
+	if (opt == 0 && flagvalue == NULL) 
 	{
-	public:
+		fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed - returned NULL pointer\n\n", funcname);
+		return(1);
+	}
+	// 1. Check if flag < 0
+	else if (opt == 1) 
+	{
+		
+		int *errflag = (int *)flagvalue;
+		if (*errflag < 0) 
+		{
+			fprintf(stderr, "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n", funcname, *errflag);
+			return(1);
+		}
+	}
+	// 2. Check if function returned NULL pointer - no memory allocated
+	else if (opt == 2 && flagvalue == NULL) 
+	{
+		fprintf(stderr, "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n", funcname);
+		return(1);
+	}
 
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
-					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
-
-		void Solve(const bool verbose = false);
-
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
-
-		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
-
-	private:
-
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
-		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
-
-		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
-		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
-		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
-		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
-
-		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
-		OpenSMOKE::Grid1D* grid;
-		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
-		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
-		OpenSMOKE::HMOM* hmom;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
-	};
+	return(0);
 }
 
-#include "Premixed1DFlameExperiment.hpp"
+realtype N_SumAbs(N_Vector x)
+{
+	realtype *xd;
+	xd = NULL;
 
-#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+	long int N = NV_LENGTH_S(x);
+	xd = NV_DATA_S(x);
+
+	realtype sum = 0.;
+	for (long int i = 0; i < N; i++)
+		sum += std::fabs(xd[i]);
+
+	return(sum);
+}
+
+realtype N_Norm2(N_Vector x)
+{
+	realtype *xd;
+	xd = NULL;
+
+	long int N = NV_LENGTH_S(x);
+	xd = NV_DATA_S(x);
+
+	realtype sum = 0.;
+	for (long int i = 0; i < N; i++)
+		sum += xd[i] * xd[i];
+
+	return(std::sqrt(sum));
+}

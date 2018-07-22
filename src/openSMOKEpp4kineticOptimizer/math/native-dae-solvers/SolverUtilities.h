@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------*\
+/*----------------------------------------------------------------------*\
 |    ___                   ____  __  __  ___  _  _______                  |
 |   / _ \ _ __   ___ _ __ / ___||  \/  |/ _ \| |/ / ____| _     _         |
 |  | | | | '_ \ / _ \ '_ \\___ \| |\/| | | | | ' /|  _| _| |_ _| |_       |
@@ -18,7 +18,7 @@
 |                                                                         |
 |	License                                                               |
 |                                                                         |
-|   Copyright(C) 2018  Alberto Cuoci                                      |
+|   Copyright(C) 2014, 2013, 2012  Alberto Cuoci                          |
 |   OpenSMOKE++ is free software: you can redistribute it and/or modify   |
 |   it under the terms of the GNU General Public License as published by  |
 |   the Free Software Foundation, either version 3 of the License, or     |
@@ -34,72 +34,76 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
-#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#ifndef DaeSolverUtilities_H
+#define DaeSolverUtilities_H
 
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/Utilities.h"
-#include "idealreactors/utilities/Grammar_LewisNumbers.h"
-
-// 1D grid
-#include "utilities/grids/adaptive/Grid1D.h"
-#include "utilities/grids/adaptive/Grammar_Grid1D.h"
-#include "utilities/grids/adaptive/Adapter_Grid1D.h"
-
-// Hybrid Method of Moments
-#include "utilities/soot/hmom/HMOM.h"
-
-#include "OptimizationRules_Premixed1DFlameExperiment.h"
-#include "Grammar_Premixed1DFlameExperiment.h"
-#include "OpenSMOKE_PremixedLaminarFlame1D.h"
-
-
-namespace OpenSMOKE
+namespace DaeSMOKE
 {
-	class Premixed1DFlameExperiment
+
+	enum DaeHStatus
 	{
-	public:
-
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
-					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
-
-		void Solve(const bool verbose = false);
-
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
-
-		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
-
-	private:
-
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
-		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
-
-		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
-		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
-		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
-		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
-
-		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
-		OpenSMOKE::Grid1D* grid;
-		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
-		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
-		OpenSMOKE::HMOM* hmom;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
+		H_STATUS_DECREASED,
+		H_STATUS_CONST,
+		H_STATUS_INCREASED
 	};
+
+	enum DaeOrderStatus
+	{
+		ORDER_STATUS_DECREASED,
+		ORDER_STATUS_CONST,
+		ORDER_STATUS_INCREASED
+	};
+
+	enum JacobianType
+	{
+		JACOBIAN_TYPE_CONST,
+		JACOBIAN_TYPE_USERDEFINED,
+		JACOBIAN_TYPE_NUMERICAL
+	};
+
+	enum JacobianStatus
+	{
+		JACOBIAN_STATUS_HAS_TO_BE_CHANGED,
+		JACOBIAN_STATUS_MODIFIED,
+		JACOBIAN_STATUS_OK
+	};
+
+	enum FactorizationStatus
+	{
+		MATRIX_HAS_TO_BE_FACTORIZED,
+		MATRIX_FACTORIZED,
+	};
+
+	enum DaeConvergence
+	{
+		CONVERGENCE_STATUS_FAILURE,
+		CONVERGENCE_STATUS_OK
+	};
+
+	enum DaeStatus
+	{
+		DAE_STATUS_TO_BE_INITIALIZED = 1,
+		DAE_STATUS_CONTINUATION = 2,
+		DAE_STATUS_STOP_INTEGRATION_BEFORE_RECALCULATING_JACOBIAN = 10,
+		DAE_STATUS_STOP_INTEGRATION_FOR_SMALL_YPRIME_NORM1 = 11,
+		DAE_STATUS_MAX_NUMBER_OF_STEPS_REACHED = 12,
+
+		DAE_STATUS_TOO_STRICT_TOLERANCES = -2,		
+		DAE_STATUS_ILLEGAL_MAX_INDEPENDENT_VARIABLE = -3,
+		DAE_STATUS_MAX_NUMBER_ERRORTEST_FAILURES = -4,
+		DAE_STATUS_MAX_NUMBER_CONVERGENCETEST_FAILURES = -5,
+		DAE_STATUS_TOO_SMALL_STEP_SIZE = -6,
+		DAE_STATUS_YOU_MUST_USE_TCRITIC_STATE = -7,
+		DAE_STATUS_ILLEGAL_CONTINUATION_REQUEST = -8,
+		DAE_STATUS_ILLEGAL_CONSTRAINTS = -9,
+		DAE_STATUS_EXCEPTION_HANDLING_STOP = -10,
+		DAE_STATUS_DEINITIALIZE_STATE = -11,
+		DAE_STATUS_YOU_CANNOT_OVERSHOOT_TCRITIC = -12,
+	};
+
+	unsigned int Factorial(unsigned int n);
 }
 
-#include "Premixed1DFlameExperiment.hpp"
+#include "SolverUtilities.hpp"
 
-#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#endif // DAESolverUtilities_H
