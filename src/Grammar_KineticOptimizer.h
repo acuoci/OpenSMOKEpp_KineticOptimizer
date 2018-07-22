@@ -72,6 +72,11 @@ namespace OpenSMOKE
 				"List of input files for experiments (plug flow reactors)",
 				false));
 
+			AddKeyWord(OpenSMOKE::OpenSMOKE_DictionaryKeyWord("@ListOfPremixed1DExperiments",
+				OpenSMOKE::VECTOR_STRING,
+				"List of input files for experiments (premixed 1d flames)",
+				false));
+
 			AddKeyWord(OpenSMOKE::OpenSMOKE_DictionaryKeyWord("@ListOfTarget_A",
 				OpenSMOKE::VECTOR_INT,
 				"List of target reactions for frequency factors (indices starting from 1)",

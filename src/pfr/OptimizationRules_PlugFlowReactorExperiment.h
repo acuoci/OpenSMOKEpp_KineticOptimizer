@@ -34,12 +34,12 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_OptimizationRules_H
-#define OpenSMOKE_OptimizationRules_H
+#ifndef OpenSMOKE_OptimizationRules_PlugFlowReactorExperiment_H
+#define OpenSMOKE_OptimizationRules_PlugFlowReactorExperiment_H
 
 namespace OpenSMOKE
 {
-	class Grammar_OptimizationRules : public OpenSMOKE::OpenSMOKE_DictionaryGrammar
+	class Grammar_OptimizationRules_PlugFlowReactorExperiment : public OpenSMOKE::OpenSMOKE_DictionaryGrammar
 	{
 	protected:
 
@@ -57,7 +57,7 @@ namespace OpenSMOKE
 		}
 	};
 
-	class OptimizationRules
+	class OptimizationRules_PlugFlowReactorExperiment
 	{
 	public:
 
@@ -72,9 +72,9 @@ namespace OpenSMOKE
 		bool slope_definition_;
 	};
 
-	void OptimizationRules::SetupFromDictionary(OpenSMOKE::OpenSMOKE_Dictionary& dictionary, OpenSMOKE::OpenSMOKE_DictionaryManager& dictionaries)
+	void OptimizationRules_PlugFlowReactorExperiment::SetupFromDictionary(OpenSMOKE::OpenSMOKE_Dictionary& dictionary, OpenSMOKE::OpenSMOKE_DictionaryManager& dictionaries)
 	{
-		Grammar_OptimizationRules grammar;
+		Grammar_OptimizationRules_PlugFlowReactorExperiment grammar;
 		dictionary.SetGrammar(grammar);
 
 		if (dictionary.CheckOption("@IgnitionDelayTime") == true)
@@ -101,4 +101,4 @@ namespace OpenSMOKE
 	}
 }
 
-#endif // OptimizationRules
+#endif // OpenSMOKE_OptimizationRules_PlugFlowReactorExperiment_H

@@ -72,10 +72,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Development\OpenSMOKEpp\OpenSMOKEpp\source;C:\Development\ExternalNumericalLibraries\Boost\boost_1_65_1;C:\Development\ExternalNumericalLibraries\Eigen\Eigen3.3;C:\Development\ExternalNumericalLibraries\RapidXML\rapidxml-1.13;C:\Development\ExternalNumericalLibraries\NLopt\nlopt-2.4.2-dll64;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Development\OpenSMOKEpp\OpenSMOKEpp\source;C:\Development\ExternalNumericalLibraries\Boost\boost_1_65_1;C:\Development\ExternalNumericalLibraries\Eigen\Eigen3.3;C:\Development\ExternalNumericalLibraries\RapidXML\rapidxml-1.13;C:\Development\ExternalNumericalLibraries\NLopt\nlopt-2.4.2-dll64;C:\Development\OpenSMOKEpp\OpenSMOKEppSolvers\src\premixedlaminarflame1d;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Development\OpenSMOKEpp\OpenSMOKEpp\source;C:\Development\ExternalNumericalLibraries\Boost\boost_1_65_1;C:\Development\ExternalNumericalLibraries\Eigen\Eigen3.3;C:\Development\ExternalNumericalLibraries\RapidXML\rapidxml-1.13;C:\Development\ExternalNumericalLibraries\NLopt\nlopt-2.4.2-dll64;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Development\OpenSMOKEpp\OpenSMOKEpp\source;C:\Development\ExternalNumericalLibraries\Boost\boost_1_65_1;C:\Development\ExternalNumericalLibraries\Eigen\Eigen3.3;C:\Development\ExternalNumericalLibraries\RapidXML\rapidxml-1.13;C:\Development\ExternalNumericalLibraries\NLopt\nlopt-2.4.2-dll64;C:\Development\OpenSMOKEpp\OpenSMOKEppSolvers\src\premixedlaminarflame1d;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -137,11 +137,16 @@
     <ClInclude Include="..\..\..\src\batch\BatchReactorExperiment.h" />
     <ClInclude Include="..\..\..\src\batch\BatchReactorExperiment.hpp" />
     <ClInclude Include="..\..\..\src\batch\Grammar_BatchReactorExperiment.h" />
+    <ClInclude Include="..\..\..\src\batch\OptimizationRules_BatchReactorExperiment.h" />
     <ClInclude Include="..\..\..\src\Grammar_KineticOptimizer.h" />
-    <ClInclude Include="..\..\..\src\OptimizationRules.h" />
     <ClInclude Include="..\..\..\src\pfr\Grammar_PlugFlowReactorExperiment.h" />
+    <ClInclude Include="..\..\..\src\pfr\OptimizationRules_PlugFlowReactorExperiment.h" />
     <ClInclude Include="..\..\..\src\pfr\PlugFlowReactorExperiment.h" />
     <ClInclude Include="..\..\..\src\pfr\PlugFlowReactorExperiment.hpp" />
+    <ClInclude Include="..\..\..\src\premixed1d\Grammar_Premixed1DFlameExperiment.h" />
+    <ClInclude Include="..\..\..\src\premixed1d\OptimizationRules_Premixed1DFlameExperiment.h" />
+    <ClInclude Include="..\..\..\src\premixed1d\Premixed1DFlameExperiment.h" />
+    <ClInclude Include="..\..\..\src\premixed1d\Premixed1DFlameExperiment.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\OpenSMOKEpp_KineticOptimizer.cpp" />

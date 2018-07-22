@@ -22,12 +22,12 @@
     <Filter Include="Source Files\optimizer">
       <UniqueIdentifier>{14debf04-e24f-4541-8ddd-f499c252c479}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\premixed1d">
+      <UniqueIdentifier>{60d68e04-8d8a-4109-a7a2-d72c11d79b16}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Grammar_KineticOptimizer.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\OptimizationRules.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\batch\BatchReactorExperiment.h">
@@ -53,6 +53,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\..\..\..\..\Development\OpenSMOKEpp\OpenSMOKEpp\source\math\native-minimization-solvers\MinimizationSimplex.hpp">
       <Filter>Source Files\optimizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\premixed1d\Grammar_Premixed1DFlameExperiment.h">
+      <Filter>Source Files\premixed1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\premixed1d\Premixed1DFlameExperiment.h">
+      <Filter>Source Files\premixed1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\premixed1d\Premixed1DFlameExperiment.hpp">
+      <Filter>Source Files\premixed1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\premixed1d\OptimizationRules_Premixed1DFlameExperiment.h">
+      <Filter>Source Files\premixed1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\pfr\OptimizationRules_PlugFlowReactorExperiment.h">
+      <Filter>Source Files\pfr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\batch\OptimizationRules_BatchReactorExperiment.h">
+      <Filter>Source Files\batch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

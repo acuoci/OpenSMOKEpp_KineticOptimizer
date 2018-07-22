@@ -34,61 +34,64 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PlugFlowReactorExperiment_H
-#define OpenSMOKE_PlugFlowReactorExperiment_H
+#ifndef OpenSMOKE_PremixedPremixed1DFlameExperiment_H
+#define OpenSMOKE_PremixedPremixed1DFlameExperiment_H
 
 // Utilities
 #include "idealreactors/utilities/Utilities"
 #include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/cema/OnTheFlyCEMA.h"
 #include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/soot/polimi/OpenSMOKE_PolimiSoot_Analyzer.h"
+#include "utilities/Utilities.h"
+#include "idealreactors/utilities/Grammar_LewisNumbers.h"
 
-// Standard plug flow reactors
-#include "Grammar_PlugFlowReactorExperiment.h"
-#include "idealreactors/plugflow/PlugFlowReactor"
+// 1D grid
+#include "utilities/grids/adaptive/Grid1D.h"
+#include "utilities/grids/adaptive/Grammar_Grid1D.h"
+#include "utilities/grids/adaptive/Adapter_Grid1D.h"
 
-// Optimization rules
-#include "OptimizationRules_PlugFlowReactorExperiment.h"
+// Hybrid Method of Moments
+#include "utilities/soot/hmom/HMOM.h"
+
+#include "OptimizationRules_Premixed1DFlameExperiment.h"
+#include "Grammar_Premixed1DFlameExperiment.h"
+#include "OpenSMOKE_PremixedLaminarFlame1D.h"
+
 
 namespace OpenSMOKE
 {
-	class PlugFlowReactorExperiment
+	class Premixed1DFlameExperiment
 	{
 	public:
 
 		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*	thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*			kineticsMapXML);
+					OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML,
+					OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML,
+					OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML);
 
 		void Solve(const bool verbose = false);
-		double Solve(const double x);
 
 		double norm2_abs_error() const { return norm2_abs_error_; }
 		double norm2_rel_error() const { return norm2_rel_error_; }
 
-
-		const OpenSMOKE::OptimizationRules_PlugFlowReactorExperiment* optimization() const { return optimization_; }
+		const OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment* optimization() const { return optimization_; }
 
 	private:
 
-		OpenSMOKE::PlugFlowReactor_Type type_;
-		OpenSMOKE::PlugFlowReactor_Isothermal* plugflow_isothermal_;
-		OpenSMOKE::PlugFlowReactor_NonIsothermal* plugflow_non_isothermal_;
-
-
 		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*	thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*			kineticsMapXML_;
+		OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML_;
+		OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML_;
+		OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML_;
 
-		OpenSMOKE::OptimizationRules_PlugFlowReactorExperiment*	optimization_;
-		OpenSMOKE::PolimiSoot_Analyzer*							polimi_soot_;
-		OpenSMOKE::OnTheFlyPostProcessing*						on_the_fly_post_processing_;
-		OpenSMOKE::OnTheFlyROPA*								onTheFlyROPA_;
-		OpenSMOKE::PlugFlowReactor_Options*						plugflow_options_;
-		OpenSMOKE::ODE_Parameters*								ode_parameters_;
-		OpenSMOKE::SensitivityAnalysis_Options*					sensitivity_options_;
-		OpenSMOKE::IgnitionDelayTimes_Analyzer*					idt;
+		OpenSMOKE::OptimizationRules_Premixed1DFlameExperiment*	optimization_;
+		DaeSMOKE::DaeSolver_Parameters*							dae_parameters;
+		NlsSMOKE::NonLinearSolver_Parameters*					nls_parameters;
+		NlsSMOKE::FalseTransientSolver_Parameters*				false_transient_parameters;
+
+		OpenSMOKE::SensitivityAnalysis_Options* sensitivity_options;
+		OpenSMOKE::Grid1D* grid;
+		OpenSMOKE::PolimiSoot_Analyzer* polimi_soot;
+		OpenSMOKE::OnTheFlyPostProcessing* on_the_fly_post_processing;
+		OpenSMOKE::HMOM* hmom;
 
 		double end_value_;
 
@@ -97,6 +100,6 @@ namespace OpenSMOKE
 	};
 }
 
-#include "PlugFlowReactorExperiment.hpp"
+#include "Premixed1DFlameExperiment.hpp"
 
-#endif // OpenSMOKE_PlugFlowReactorExperiment_H
+#endif // OpenSMOKE_PremixedPremixed1DFlameExperiment_H

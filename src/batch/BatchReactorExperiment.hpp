@@ -357,7 +357,7 @@ namespace OpenSMOKE
 
 		// Optimization
 		{
-			optimization_ = new OpenSMOKE::OptimizationRules;
+			optimization_ = new OpenSMOKE::OptimizationRules_BatchReactorExperiment;
 
 			std::string name_of_optimization_subdictionary;
 			if (dictionaries(main_dictionary_name_).CheckOption("@Optimization") == true)

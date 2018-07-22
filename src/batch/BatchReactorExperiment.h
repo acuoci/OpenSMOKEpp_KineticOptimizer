@@ -49,7 +49,7 @@
 #include "Grammar_BatchReactorExperiment.h"
 
 // Optimization rules
-#include "OptimizationRules.h"
+#include "OptimizationRules_BatchReactorExperiment.h"
 
 namespace OpenSMOKE
 {
@@ -68,7 +68,7 @@ namespace OpenSMOKE
 		double norm2_abs_error() const { return norm2_abs_error_; }
 		double norm2_rel_error() const { return norm2_rel_error_; }
 
-		const OpenSMOKE::OptimizationRules* optimization() const { return optimization_; }
+		const OpenSMOKE::OptimizationRules_BatchReactorExperiment* optimization() const { return optimization_; }
 
 	private:
 
@@ -84,15 +84,15 @@ namespace OpenSMOKE
 		OpenSMOKE::ThermodynamicsMap_CHEMKIN*	thermodynamicsMapXML_;
 		OpenSMOKE::KineticsMap_CHEMKIN*			kineticsMapXML_;
 
-		OpenSMOKE::OptimizationRules*			optimization_;
-		OpenSMOKE::PolimiSoot_Analyzer*			polimi_soot_;
-		OpenSMOKE::OnTheFlyPostProcessing*		on_the_fly_post_processing_;
-		OpenSMOKE::OnTheFlyROPA*				onTheFlyROPA_;
-		OpenSMOKE::BatchReactor_Options*		batch_options_;
-		OpenSMOKE::ODE_Parameters*				ode_parameters_;
-		OpenSMOKE::SensitivityAnalysis_Options*	sensitivity_options_;
-		OpenSMOKE::IgnitionDelayTimes_Analyzer*	idt;
-		OpenSMOKE::OnTheFlyCEMA*				onTheFlyCEMA;
+		OpenSMOKE::OptimizationRules_BatchReactorExperiment*	optimization_;
+		OpenSMOKE::PolimiSoot_Analyzer*							polimi_soot_;
+		OpenSMOKE::OnTheFlyPostProcessing*						on_the_fly_post_processing_;
+		OpenSMOKE::OnTheFlyROPA*								onTheFlyROPA_;
+		OpenSMOKE::BatchReactor_Options*						batch_options_;
+		OpenSMOKE::ODE_Parameters*								ode_parameters_;
+		OpenSMOKE::SensitivityAnalysis_Options*					sensitivity_options_;
+		OpenSMOKE::IgnitionDelayTimes_Analyzer*					idt;
+		OpenSMOKE::OnTheFlyCEMA*								onTheFlyCEMA;
 
 		double tStart_;
 		double tEnd_;

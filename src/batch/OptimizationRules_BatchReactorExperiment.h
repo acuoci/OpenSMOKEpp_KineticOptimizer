@@ -34,69 +34,71 @@
 |                                                                         |
 \*-----------------------------------------------------------------------*/
 
-#ifndef OpenSMOKE_PlugFlowReactorExperiment_H
-#define OpenSMOKE_PlugFlowReactorExperiment_H
-
-// Utilities
-#include "idealreactors/utilities/Utilities"
-#include "utilities/ropa/OnTheFlyROPA.h"
-#include "utilities/cema/OnTheFlyCEMA.h"
-#include "utilities/ontheflypostprocessing/OnTheFlyPostProcessing.h"
-#include "utilities/soot/polimi/OpenSMOKE_PolimiSoot_Analyzer.h"
-
-// Standard plug flow reactors
-#include "Grammar_PlugFlowReactorExperiment.h"
-#include "idealreactors/plugflow/PlugFlowReactor"
-
-// Optimization rules
-#include "OptimizationRules_PlugFlowReactorExperiment.h"
+#ifndef OpenSMOKE_OptimizationRules_BatchReactorExperiment_H
+#define OpenSMOKE_OptimizationRules_BatchReactorExperiment_H
 
 namespace OpenSMOKE
 {
-	class PlugFlowReactorExperiment
+	class Grammar_OptimizationRules_BatchReactorExperiment : public OpenSMOKE::OpenSMOKE_DictionaryGrammar
+	{
+	protected:
+
+		virtual void DefineRules()
+		{
+			AddKeyWord(OpenSMOKE::OpenSMOKE_DictionaryKeyWord("@IgnitionDelayTime",
+				OpenSMOKE::SINGLE_MEASURE,
+				"Ignition delay time",
+				true));
+
+			AddKeyWord(OpenSMOKE::OpenSMOKE_DictionaryKeyWord("@Definition",
+				OpenSMOKE::SINGLE_STRING,
+				"Ignition delay time definition: slope | increase",
+				true));
+		}
+	};
+
+	class OptimizationRules_BatchReactorExperiment
 	{
 	public:
 
-		void Setup(	const std::string input_file_name,
-					OpenSMOKE::ThermodynamicsMap_CHEMKIN*	thermodynamicsMapXML,
-					OpenSMOKE::KineticsMap_CHEMKIN*			kineticsMapXML);
+		void SetupFromDictionary(OpenSMOKE::OpenSMOKE_Dictionary& dictionary, OpenSMOKE::OpenSMOKE_DictionaryManager& dictionaries);
 
-		void Solve(const bool verbose = false);
-		double Solve(const double x);
-
-		double norm2_abs_error() const { return norm2_abs_error_; }
-		double norm2_rel_error() const { return norm2_rel_error_; }
-
-
-		const OpenSMOKE::OptimizationRules_PlugFlowReactorExperiment* optimization() const { return optimization_; }
+		double tau() const { return tau_; }
+		bool slope_definition() const { return slope_definition_; }
 
 	private:
 
-		OpenSMOKE::PlugFlowReactor_Type type_;
-		OpenSMOKE::PlugFlowReactor_Isothermal* plugflow_isothermal_;
-		OpenSMOKE::PlugFlowReactor_NonIsothermal* plugflow_non_isothermal_;
-
-
-		// Read thermodynamics and kinetics maps
-		OpenSMOKE::ThermodynamicsMap_CHEMKIN*	thermodynamicsMapXML_;
-		OpenSMOKE::KineticsMap_CHEMKIN*			kineticsMapXML_;
-
-		OpenSMOKE::OptimizationRules_PlugFlowReactorExperiment*	optimization_;
-		OpenSMOKE::PolimiSoot_Analyzer*							polimi_soot_;
-		OpenSMOKE::OnTheFlyPostProcessing*						on_the_fly_post_processing_;
-		OpenSMOKE::OnTheFlyROPA*								onTheFlyROPA_;
-		OpenSMOKE::PlugFlowReactor_Options*						plugflow_options_;
-		OpenSMOKE::ODE_Parameters*								ode_parameters_;
-		OpenSMOKE::SensitivityAnalysis_Options*					sensitivity_options_;
-		OpenSMOKE::IgnitionDelayTimes_Analyzer*					idt;
-
-		double end_value_;
-
-		double norm2_abs_error_;
-		double norm2_rel_error_;
+		double tau_;
+		bool slope_definition_;
 	};
+
+	void OptimizationRules_BatchReactorExperiment::SetupFromDictionary(OpenSMOKE::OpenSMOKE_Dictionary& dictionary, OpenSMOKE::OpenSMOKE_DictionaryManager& dictionaries)
+	{
+		Grammar_OptimizationRules_BatchReactorExperiment grammar;
+		dictionary.SetGrammar(grammar);
+
+		if (dictionary.CheckOption("@IgnitionDelayTime") == true)
+		{
+			std::string units;
+			double value;
+			dictionary.ReadMeasure("@IgnitionDelayTime", value, units);
+			if (units == "s")         tau_ = value;
+			else if (units == "ms")   tau_ = value / 1000.;
+			else if (units == "min")  tau_ = value * 60.;
+			else if (units == "h")    tau_ = value * 3600.;
+			else OpenSMOKE::FatalErrorMessage("Unknown time units");
+		}
+
+		if (dictionary.CheckOption("@Definition") == true)
+		{
+			std::string value;
+			dictionary.ReadString("@Definition", value);
+			if (value == "slope")			slope_definition_ = true;
+			else if (value == "increase")   slope_definition_ = false;
+			else OpenSMOKE::FatalErrorMessage("Unknown ignition delay time definition. Available options: slope | increase");
+		}
+
+	}
 }
 
-#include "PlugFlowReactorExperiment.hpp"
-
-#endif // OpenSMOKE_PlugFlowReactorExperiment_H
+#endif // OpenSMOKE_OptimizationRules_BatchReactorExperiment_H

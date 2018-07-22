@@ -58,9 +58,10 @@
 // CHEMKIN maps
 #include "maps/Maps_CHEMKIN"
 
-// Ideal reactors
+// Ideal reactors/flames
 #include "batch/BatchReactorExperiment.h"
 #include "pfr/PlugFlowReactorExperiment.h"
+#include "premixed1d/Premixed1DFlameExperiment.h"
 
 // Optimizer
 #include "Grammar_KineticOptimizer.h"
@@ -85,9 +86,11 @@ double OPTIMFunction(const arma::vec& x, arma::vec* grad_out, void* opt_data);
 
 OpenSMOKE::BatchReactorExperiment* batch_reactors;
 OpenSMOKE::PlugFlowReactorExperiment* plugflow_reactors;
+OpenSMOKE::Premixed1DFlameExperiment* premixed1d_flames;
 
 unsigned int nExpBatch;
 unsigned int nExpPlug;
+unsigned int nExpPremixed1D;
 bool obj_function_relative_errors;
 
 int number_parameters;
@@ -128,6 +131,7 @@ std::vector<double> k0_2000;
 // Thermodynamics and kinetics maps
 OpenSMOKE::ThermodynamicsMap_CHEMKIN*		thermodynamicsMapXML;
 OpenSMOKE::KineticsMap_CHEMKIN*				kineticsMapXML;
+OpenSMOKE::TransportPropertiesMap_CHEMKIN*	transportMapXML;
 
 unsigned int numberOfGradientEvaluations;
 unsigned int numberOfFunctionEvaluations;
@@ -213,10 +217,14 @@ int main(int argc, char** argv)
 		if (dictionaries(name_of_rapid_kinetics_subdictionary).CheckOption("@Kinetics") == true)
 			dictionaries(name_of_rapid_kinetics_subdictionary).ReadPath("@Kinetics", path_input_kinetics);
 
+		boost::filesystem::path path_input_transport;
+		if (dictionaries(name_of_rapid_kinetics_subdictionary).CheckOption("@Transport") == true)
+			dictionaries(name_of_rapid_kinetics_subdictionary).ReadPath("@Transport", path_input_transport);
+
 		if (dictionaries(name_of_rapid_kinetics_subdictionary).CheckOption("@Output") == true)
 			dictionaries(name_of_rapid_kinetics_subdictionary).ReadPath("@Output", path_kinetics_output);
 
-		OpenSMOKE::RapidKineticMechanismWithoutTransport(path_kinetics_output, path_input_thermodynamics.c_str(), path_input_kinetics.c_str());
+		OpenSMOKE::RapidKineticMechanismWithTransport(path_kinetics_output, path_input_transport.c_str(), path_input_thermodynamics.c_str(), path_input_kinetics.c_str());
 	}
 
 	// Import thermodynamic and kinetic maps
@@ -228,6 +236,7 @@ int main(int argc, char** argv)
 		double tStart = OpenSMOKE::OpenSMOKEGetCpuTime();
 		thermodynamicsMapXML = new OpenSMOKE::ThermodynamicsMap_CHEMKIN(doc);
 		kineticsMapXML = new OpenSMOKE::KineticsMap_CHEMKIN(*thermodynamicsMapXML, doc);
+		transportMapXML = new OpenSMOKE::TransportPropertiesMap_CHEMKIN(doc);
 
 		double tEnd = OpenSMOKE::OpenSMOKEGetCpuTime();
 		std::cout << "Time to read XML file: " << tEnd - tStart << std::endl;
@@ -243,6 +252,11 @@ int main(int argc, char** argv)
 	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfPlugFlowExperiments") == true)
 	{
 		dictionaries(main_dictionary_name_).ReadOption("@ListOfPlugFlowExperiments", list_of_plugflow_experiments);
+	}
+	std::vector<std::string> list_of_premixed1d_experiments;
+	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfPremixed1DExperiments") == true)
+	{
+		dictionaries(main_dictionary_name_).ReadOption("@ListOfPremixed1DExperiments", list_of_premixed1d_experiments);
 	}
 
 	// List of optimization parameters
@@ -386,6 +400,17 @@ int main(int argc, char** argv)
 			{
 				plugflow_reactors[k].Setup(list_of_plugflow_experiments[k], thermodynamicsMapXML, kineticsMapXML);
 				plugflow_reactors[k].Solve(true);
+			}
+		}
+
+		nExpPremixed1D = list_of_premixed1d_experiments.size();
+		if (nExpPremixed1D != 0)
+		{
+			premixed1d_flames = new OpenSMOKE::Premixed1DFlameExperiment[nExpPremixed1D];
+			for (unsigned int k = 0; k < nExpPremixed1D; k++)
+			{
+				premixed1d_flames[k].Setup(list_of_premixed1d_experiments[k], thermodynamicsMapXML, kineticsMapXML, transportMapXML);
+				premixed1d_flames[k].Solve(true);
 			}
 		}
 	}
@@ -756,6 +781,13 @@ double ReturnObjFunction(const Eigen::VectorXd parameters)
 			plugflow_reactors[k].Solve();
 			fobj_abs += plugflow_reactors[k].norm2_abs_error();
 			fobj_rel += plugflow_reactors[k].norm2_rel_error();
+		}
+
+		for (unsigned int k = 0; k < nExpPremixed1D; k++)
+		{
+			premixed1d_flames[k].Solve();
+			fobj_abs += premixed1d_flames[k].norm2_abs_error();
+			fobj_rel += premixed1d_flames[k].norm2_rel_error();
 		}
 	}
 
