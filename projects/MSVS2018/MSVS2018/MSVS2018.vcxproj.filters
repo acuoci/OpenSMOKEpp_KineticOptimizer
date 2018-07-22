@@ -25,6 +25,9 @@
     <Filter Include="Source Files\premixed1d">
       <UniqueIdentifier>{60d68e04-8d8a-4109-a7a2-d72c11d79b16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\counterflow1d">
+      <UniqueIdentifier>{cd777385-d307-423f-8efd-2576d97285b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\Grammar_KineticOptimizer.h">
@@ -71,6 +74,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\batch\OptimizationRules_BatchReactorExperiment.h">
       <Filter>Source Files\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\counterflow1d\CounterFlow1DFlameExperiment.h">
+      <Filter>Source Files\counterflow1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\counterflow1d\CounterFlow1DFlameExperiment.hpp">
+      <Filter>Source Files\counterflow1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\counterflow1d\Grammar_CounterFlow1DFlameExperiment.h">
+      <Filter>Source Files\counterflow1d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\counterflow1d\OptimizationRules_CounterFlow1DFlameExperiment.h">
+      <Filter>Source Files\counterflow1d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

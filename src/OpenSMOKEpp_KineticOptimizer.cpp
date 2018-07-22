@@ -62,6 +62,7 @@
 #include "batch/BatchReactorExperiment.h"
 #include "pfr/PlugFlowReactorExperiment.h"
 #include "premixed1d/Premixed1DFlameExperiment.h"
+#include "counterflow1d/CounterFlow1DFlameExperiment.h"
 
 // Optimizer
 #include "Grammar_KineticOptimizer.h"
@@ -87,10 +88,13 @@ double OPTIMFunction(const arma::vec& x, arma::vec* grad_out, void* opt_data);
 OpenSMOKE::BatchReactorExperiment* batch_reactors;
 OpenSMOKE::PlugFlowReactorExperiment* plugflow_reactors;
 OpenSMOKE::Premixed1DFlameExperiment* premixed1d_flames;
+OpenSMOKE::CounterFlow1DFlameExperiment* counterflow1d_flames;
 
 unsigned int nExpBatch;
 unsigned int nExpPlug;
 unsigned int nExpPremixed1D;
+unsigned int nExpCounterFlow1D;
+
 bool obj_function_relative_errors;
 
 int number_parameters;
@@ -245,19 +249,20 @@ int main(int argc, char** argv)
 	// List of experiments
 	std::vector<std::string> list_of_batch_experiments;
 	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfBatchExperiments") == true)
-	{
 		dictionaries(main_dictionary_name_).ReadOption("@ListOfBatchExperiments", list_of_batch_experiments);
-	}
+	
 	std::vector<std::string> list_of_plugflow_experiments;
 	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfPlugFlowExperiments") == true)
-	{
 		dictionaries(main_dictionary_name_).ReadOption("@ListOfPlugFlowExperiments", list_of_plugflow_experiments);
-	}
+	
 	std::vector<std::string> list_of_premixed1d_experiments;
 	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfPremixed1DExperiments") == true)
-	{
 		dictionaries(main_dictionary_name_).ReadOption("@ListOfPremixed1DExperiments", list_of_premixed1d_experiments);
-	}
+	
+	std::vector<std::string> list_of_counterflow1d_experiments;
+	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfCounterFlow1DExperiments") == true)
+		dictionaries(main_dictionary_name_).ReadOption("@ListOfCounterFlow1DExperiments", list_of_counterflow1d_experiments);
+	
 
 	// List of optimization parameters
 	if (dictionaries(main_dictionary_name_).CheckOption("@ListOfTarget_A") == true)
@@ -411,6 +416,17 @@ int main(int argc, char** argv)
 			{
 				premixed1d_flames[k].Setup(list_of_premixed1d_experiments[k], thermodynamicsMapXML, kineticsMapXML, transportMapXML);
 				premixed1d_flames[k].Solve(true);
+			}
+		}
+
+		nExpCounterFlow1D = list_of_counterflow1d_experiments.size();
+		if (nExpCounterFlow1D != 0)
+		{
+			counterflow1d_flames = new OpenSMOKE::CounterFlow1DFlameExperiment[nExpCounterFlow1D];
+			for (unsigned int k = 0; k < nExpCounterFlow1D; k++)
+			{
+				counterflow1d_flames[k].Setup(list_of_counterflow1d_experiments[k], thermodynamicsMapXML, kineticsMapXML, transportMapXML);
+				counterflow1d_flames[k].Solve(true);
 			}
 		}
 	}
@@ -788,6 +804,13 @@ double ReturnObjFunction(const Eigen::VectorXd parameters)
 			premixed1d_flames[k].Solve();
 			fobj_abs += premixed1d_flames[k].norm2_abs_error();
 			fobj_rel += premixed1d_flames[k].norm2_rel_error();
+		}
+
+		for (unsigned int k = 0; k < nExpCounterFlow1D; k++)
+		{
+			counterflow1d_flames[k].Solve();
+			fobj_abs += counterflow1d_flames[k].norm2_abs_error();
+			fobj_rel += counterflow1d_flames[k].norm2_rel_error();
 		}
 	}
 
